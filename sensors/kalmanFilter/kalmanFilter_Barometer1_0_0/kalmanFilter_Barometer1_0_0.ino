@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <LPS331.h>
+#include "SensorStick_9DoF.h"
 
 LPS331 ps;
 
@@ -13,7 +14,7 @@ void setup()
     Serial.println("Failed to autodetect pressure sensor!");
     while (1);
   }
-
+  sensorInit();
   ps.enableDefault();
 }
 
@@ -23,17 +24,25 @@ void loop()
   float altitude = ps.pressureToAltitudeMeters(pressure);
   float temperature = ps.readTemperatureC();
   
-  Serial.print("p: ");
-  Serial.print(pressure);
-  Serial.print(" mbar\ta: ");
-  Serial.print(altitude);
-  Serial.print(" m\tt: ");
-  Serial.print(temperature);
-  Serial.println(" deg C");
+  IMU.receiveAcc();
+  IMU.receiveGyro();
+  
+  double gyroX   = IMU.get(GYR,'x') - IMU.getZero(GYR,'x');  //オフセットぶんを差し引く
+  double accYval = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');  //オフセットぶんを差し引く
+  double accZval = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');  //オフセットぶんを差し引く
+  
+  Serial.print("gyroX: ");
+  Serial.print(gyroX);
+  Serial.print("accYval\ta:");
+  Serial.print(accYval);
+  Serial.print("accZval\tt:");
+  Serial.print(accZval);
+  Serial.println(" [deg/m]");
 
   delay(100);
 }
 
+/*
 double kalmanFilter_Barometer(double accel, double advanced, double init_advanced, double dt)
 {
   static double x[2] = {init_advanced, 0};
@@ -62,6 +71,7 @@ double kalmanFilter_Barometer(double accel, double advanced, double init_advance
     
   return x[0];
 }
+*/
 
 double getDt(void)
 {
@@ -76,3 +86,31 @@ double getDt(void)
   return( time );  
 }
 
+void sensorInit(void){  
+  IMU.begin();   
+  delay(1000);
+  
+  double accZero[3] = { 0 }; // accX, accY, accZ
+  double gyrZero[4] = { 0 }; // gyroX, gyroY, gyroZ,gyroTemp
+  double magZero[3] = { 0 }; // magX, magY, magZ
+  
+  for (int i = 0; i < 100; i++) {
+    IMU.receiveAll();
+    accZero[0] += IMU.get(ACC,'x');
+    accZero[1] += IMU.get(ACC,'y');
+    accZero[2] += IMU.get(ACC,'z');
+    gyrZero[0] += IMU.get(GYR,'x');
+    gyrZero[1] += IMU.get(GYR,'y');
+    gyrZero[2] += IMU.get(GYR,'z');
+    delay(10);
+  }
+   accZero[0] /= 100;
+   accZero[1] /= 100;
+   accZero[2] /= 100;
+   gyrZero[0] /= 100;
+   gyrZero[1] /= 100;
+   gyrZero[2] /= 100;
+  
+  accZero[2] -= 1;  //重力加速度の除去
+  IMU.setZero(accZero,gyrZero,magZero);
+}
