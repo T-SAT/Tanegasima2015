@@ -20,6 +20,8 @@
 #define INT_CFG 0x17
 #define PWR_MGM 0x3E
 
+#define START                0
+
 typedef struct {
   float flat;
   float flon;
@@ -52,17 +54,19 @@ typedef struct {
     Gyro int_data;
     uint8_t byte_data[6];
   } gyro;
-} I2C_sensor_data;
+} sensorData;
 
 class SerialSlave{
   public:
-    void select_func(int send_byte);
-	void send_GPS(void);
-	void send_Accel(void);
-	void send_Gyro(void);
-	void send_all(void);
-	void change_job(ring_buffer *);
-	int saveSD(I2C_sensor_data);
+        static void select_func(int send_byte);
+	static void change_job(ring_buffer *);
+      	static void send_GPS(void);
+        static void send_Accel(void);
+	static void send_Gyro(void);
+        static void setData_GPS(float flat, float flon, unsigned long int age);
+        static void setData_Accel(int x, int y, int z);
+        static void setData_Gyro(int x, int y, int z);
+	int saveSD(sensorData data);
 };
 
 extern SerialSlave Slave;

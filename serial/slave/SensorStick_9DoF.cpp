@@ -1,4 +1,7 @@
 #include <Wire.h>
+#include <TinyGPS.h>
+#include <SD.h>
+
 #include "SensorStick_9DoF.h"
 
 SensorStick_9DoF IMU;
@@ -25,6 +28,34 @@ void SensorStick_9DoF::begin(){
 	
 }
 
+void SensorStick_9DoF::sensorInit(){  
+  begin();   
+  delay(1000);
+  
+  double accZero[3] = { 0 }; // accX, accY, accZ
+  double gyrZero[4] = { 0 }; // gyroX, gyroY, gyroZ,gyroTemp
+  double magZero[3] = { 0 }; // magX, magY, magZ
+  
+  for (int i = 0; i < 100; i++) {
+    IMU.receiveAll();
+    accZero[0] += IMU.get(ACC,'x');
+    accZero[1] += IMU.get(ACC,'y');
+    accZero[2] += IMU.get(ACC,'z');
+    gyrZero[0] += IMU.get(GYR,'x');
+    gyrZero[1] += IMU.get(GYR,'y');
+    gyrZero[2] += IMU.get(GYR,'z');
+    delay(10);
+  }
+   accZero[0] /= 100;
+   accZero[1] /= 100;
+   accZero[2] /= 100;
+   gyrZero[0] /= 100;
+   gyrZero[1] /= 100;
+   gyrZero[2] /= 100;
+  
+  accZero[2] -= 1;  //重力加速度の除去
+  setZero(accZero,gyrZero,magZero);
+}
 
 double SensorStick_9DoF::getZero(char sensor,char axis){
   int i=0;
@@ -234,7 +265,7 @@ void SensorStick_9DoF::twiWrite(byte address, byte registerAddress, byte val[], 
 	Wire.beginTransmission(address); // start transmission to device 
 	Wire.write(registerAddress);             // send register address
 	for(int i=0;i<num;i++){
-		Wire.write(val[i]);              // send value to write
+	  Wire.write(val[i]);              // send value to write
 	}
 	Wire.endTransmission();         // end transmission
 }
@@ -259,4 +290,74 @@ int SensorStick_9DoF::twiRead(byte address, byte registerAddress,byte output[], 
 		return -1;
 	}
 	return 0;
+}
+
+void SensorStick_9DoF::recvGPS(float flat, float flon, unsigned long int age) 
+{
+  TinyGPS gps;
+  bool newData = false;
+
+  // For one second we parse GPS data and report some key values
+  for (unsigned long start = millis(); millis() - start < 1000;)
+  {
+    while (Serial.available())
+    {
+      char c = Serial.read();
+      // Serial.write(c); // uncomment this line if you want to see the GPS data flowing
+      if (gps.encode(c)) // Did a new valid sentence come in?
+        newData = true;
+    }
+  }
+
+  if (newData)
+  {
+    gps.f_get_position(&flat, &flon, &age);
+    Serial.print("#LA LO SA PR ");
+    Serial.print(","); 
+    Serial.print(flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6);
+    Serial.print(",");
+    Serial.print(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
+    Serial.print(",");
+    Serial.print(gps.satellites() == TinyGPS::GPS_INVALID_SATELLITES ? 0 : gps.satellites());
+    Serial.print(",");
+    Serial.print(gps.hdop() == TinyGPS::GPS_INVALID_HDOP ? 0 : gps.hdop());
+    Serial.print(",");
+    Serial.println(millis());
+   
+    File dataFile = SD.open("GPS.txt", FILE_WRITE);
+    
+    if(dataFile){
+      dataFile.print("#LA LO SA PR ");
+      dataFile.print(","); 
+      dataFile.print(flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6);
+      dataFile.print(",");
+      dataFile.print(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
+      dataFile.print(",");
+      dataFile.print(gps.satellites() == TinyGPS::GPS_INVALID_SATELLITES ? 0 : gps.satellites());
+      dataFile.print(",");
+      dataFile.print(gps.hdop() == TinyGPS::GPS_INVALID_HDOP ? 0 : gps.hdop());
+      dataFile.print(",");
+      dataFile.println(millis());
+      dataFile.close();
+    }
+    
+    else {
+      Serial.println("error opening datalog.txt");
+    }
+    
+    delay(1000);
+   }
+}
+
+float SensorStick_9DoF::getDt()
+{
+  static long lastTime=0;
+  
+  long nowTime = micros();
+  float time = (float)(nowTime - lastTime);
+  time = max(time,20);  //timeは20[us]以上
+  time /= 1000000;  //[usec] => [sec]
+  lastTime = nowTime;
+  
+  return( time );  
 }

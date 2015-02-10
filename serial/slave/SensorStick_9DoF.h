@@ -94,6 +94,7 @@ const double magSensityivity[3] = {1, 1, 1};
 class SensorStick_9DoF{
   public:
     void begin();
+    void sensorInit();
     int accRead(int acc[]);
     int accRead(int* accX,int* accY,int* accZ);
     int gyroRead(int gyro[]);
@@ -111,8 +112,8 @@ class SensorStick_9DoF{
     double getZero(char sensor,char axis);
     int setZero(char sensor,char axis,double zero[]);
     int setZero(double acc[],double gyro[],double mag[]);
-    
-
+    void recvGPS(float flat, float flon, unsigned long int age);
+    float getDt();
   private:
     void twiWrite(byte address, byte registerAddress, byte val);
     void twiWrite(byte address, byte registerAddress, byte val[], byte num);
