@@ -21,6 +21,7 @@
 #define PWR_MGM 0x3E
 
 #define START                0
+#define RECIEVE              1
 
 typedef struct {
   float flat;

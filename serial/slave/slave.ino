@@ -11,7 +11,6 @@ void setup()
   Serial.setintr(Slave.change_job);
   IMU.sensorInit();
   Wire.begin();
-  
 }
 
 void loop()

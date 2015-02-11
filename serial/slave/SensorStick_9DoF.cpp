@@ -4,27 +4,28 @@
 SensorStick_9DoF IMU;
   
 void SensorStick_9DoF::begin(){
-  Wire.begin();
+	Wire.begin();
 	
 	//ADXL345 PowerOn
-  twiWrite(ADXL345_ADDRESS, ADXL345_POWER_CTL, 0);      
-  twiWrite(ADXL345_ADDRESS, ADXL345_POWER_CTL, 16);
-  twiWrite(ADXL345_ADDRESS, ADXL345_POWER_CTL, 8); 
-  twiWrite(ADXL345_ADDRESS, ADXL345_DATA_FORMAT, 0x03);   //g Range set (+-)16g
+	twiWrite(ADXL345_ADDRESS, ADXL345_POWER_CTL, 0);      
+	twiWrite(ADXL345_ADDRESS, ADXL345_POWER_CTL, 16);
+	twiWrite(ADXL345_ADDRESS, ADXL345_POWER_CTL, 8); 
+        twiWrite(ADXL345_ADDRESS, ADXL345_DATA_FORMAT, 0x03);   //g Range set (+-)16g
 	
 	//ITG3200 Setup
-  twiWrite(ITG3200_ADDRESS, ITG3200_PWR_MGM, 0x00);
-  twiWrite(ITG3200_ADDRESS, ITG3200_SMPLRT_DIV , 0x04);  //5msec
-  twiWrite(ITG3200_ADDRESS, ITG3200_DLPF_FS , 0x1E);
-  twiWrite(ITG3200_ADDRESS, ITG3200_INT_CFG, 0x00);
+	twiWrite(ITG3200_ADDRESS, ITG3200_PWR_MGM, 0x00);
+	twiWrite(ITG3200_ADDRESS, ITG3200_SMPLRT_DIV , 0x04);  //5msec
+	twiWrite(ITG3200_ADDRESS, ITG3200_DLPF_FS , 0x1E);
+        twiWrite(ITG3200_ADDRESS, ITG3200_INT_CFG, 0x00);
 	
 	//HMC5883L Setup
-  twiWrite(HMC5883L_ADDRESS, HMC5883L_CONFIGURATION_REGISTER_A, 0x18);
-  twiWrite(HMC5883L_ADDRESS, HMC5883L_CONFIGURATION_REGISTER_B, HMC5883L_RANGE_1_3);
-  twiWrite(HMC5883L_ADDRESS, HMC5883L_MODE_REGISTER, HMC5883L_CONTINUOUS_MEASUREMENT_MODE);	
+	twiWrite(HMC5883L_ADDRESS, HMC5883L_CONFIGURATION_REGISTER_A, 0x18);
+	twiWrite(HMC5883L_ADDRESS, HMC5883L_CONFIGURATION_REGISTER_B, HMC5883L_RANGE_1_3);
+	twiWrite(HMC5883L_ADDRESS, HMC5883L_MODE_REGISTER, HMC5883L_CONTINUOUS_MEASUREMENT_MODE);
+	
 }
 
-void SensorStick_9DoF::sensorInit(){  
+void SensorStick_9DoF::sensorInit(){
   begin();   
   delay(1000);
   
@@ -33,13 +34,13 @@ void SensorStick_9DoF::sensorInit(){
   double magZero[3] = { 0 }; // magX, magY, magZ
   
   for (int i = 0; i < 100; i++) {
-    IMU.receiveAll();
-    accZero[0] += IMU.get(ACC,'x');
-    accZero[1] += IMU.get(ACC,'y');
-    accZero[2] += IMU.get(ACC,'z');
-    gyrZero[0] += IMU.get(GYR,'x');
-    gyrZero[1] += IMU.get(GYR,'y');
-    gyrZero[2] += IMU.get(GYR,'z');
+    receiveAll();
+    accZero[0] += get(ACC,'x');
+    accZero[1] += get(ACC,'y');
+    accZero[2] += get(ACC,'z');
+    gyrZero[0] += get(GYR,'x');
+    gyrZero[1] += get(GYR,'y');
+    gyrZero[2] += get(GYR,'z');
     delay(10);
   }
    accZero[0] /= 100;
@@ -50,9 +51,9 @@ void SensorStick_9DoF::sensorInit(){
    gyrZero[2] /= 100;
   
   accZero[2] -= 1;  //重力加速度の除去
-  IMU.setZero(accZero,gyrZero,magZero);
+  setZero(accZero,gyrZero,magZero);
 }
-
+  
 double SensorStick_9DoF::getZero(char sensor,char axis){
   int i=0;
   switch (axis) {

@@ -38,7 +38,9 @@ void SerialSlave::change_job(ring_buffer *buf)
   int check = 1;
   
   check = Serial.read();
+  
   if(check == START){
+    Serial.print(RECIEVE);
     Wire.endTransmission();
     Wire.begin(8);
     Wire.onReceive(select_func);
@@ -49,6 +51,7 @@ void SerialSlave::change_job(ring_buffer *buf)
 void SerialSlave::send_GPS(void)
 {
   Wire.write(_data.gps.byte_data, sizeof(_data.gps.float_data));
+  noInterrupts();
   Wire.endTransmission();
   Wire.begin();
   IMU.sensorInit();
@@ -57,6 +60,7 @@ void SerialSlave::send_GPS(void)
 void SerialSlave::send_Accel(void)
 {
   Wire.write(_data.accel.byte_data, sizeof(_data.accel.int_data));
+  noInterrupts();
   Wire.endTransmission();
   Wire.begin();
   IMU.sensorInit();
@@ -65,6 +69,7 @@ void SerialSlave::send_Accel(void)
 void SerialSlave::send_Gyro(void)
 {
   Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.int_data));
+  noInterrupts();
   Wire.endTransmission();
   Wire.begin();
   IMU.sensorInit();
