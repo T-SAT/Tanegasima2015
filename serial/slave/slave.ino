@@ -1,6 +1,6 @@
 //com12: slave
 #include "SensorStick_9DoF.h"
-#include "serial_slave.h"
+#include "SerialSlave.h"
 #include <Wire.h>
 #include <TinyGPS.h>
 #include <SD.h>
@@ -8,9 +8,10 @@
 void setup()
 {
   Serial.begin(9600);
+  Serial.setintr(Slave.change_job);
   IMU.sensorInit();
   Wire.begin();
-  Serial.setintr(Slave.change_job);
+  
 }
 
 void loop()
@@ -29,6 +30,7 @@ void loop()
   
   Slave.setData_Gyro(gyroX, gyroY, gyroZ);
   Slave.setData_Accel(accXval, accYval, accZval);
+  interrupts();
 }
 
 

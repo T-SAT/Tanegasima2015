@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include "serial_slave.h"
+#include "SerialSlave.h"
 #include "SensorStick_9DoF.h"
 
 SerialSlave Slave;
