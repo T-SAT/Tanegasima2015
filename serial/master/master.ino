@@ -1,5 +1,5 @@
-//com4: master
-#include "serial_master.h"
+//com10: master
+#include "SerialMaster.h"
 #include <Wire.h>
 
 void setup()
@@ -11,5 +11,6 @@ void setup()
 
 void loop()
 {
+  Master.trans_start();
   Master.request_data(ACCEL_NUM);
 }

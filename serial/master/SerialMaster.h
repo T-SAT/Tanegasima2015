@@ -7,15 +7,18 @@
 #include "WProgram.h"
 #endif
 
-#define SLAVE_DEVICE_NUM     8
+#define SLAVE_DEVICE_NUM           8
 
-#define GPS_NUM              1
-#define ACCEL_NUM            2
-#define GYRO_NUM             3
+#define GPS_NUM              (byte)1
+#define ACCEL_NUM            (byte)2
+#define GYRO_NUM             (byte)3
 
-#define ACCEL_REQUEST_BYTE   6
-#define GYRO_REQUEST_BYTE    6
-#define ERR_NUM              9
+#define ACCEL_REQUEST_BYTE         6
+#define GYRO_REQUEST_BYTE          6
+#define ERR_NUM                    9
+
+#define START                (byte)0
+#define RECIEVE              (byte)1
 
 typedef struct {
   float flat;
@@ -23,15 +26,15 @@ typedef struct {
 } GPS;
 
 typedef struct {
-  int xA;
-  int yA;
-  int zA;
+  float xA;
+  float yA;
+  float zA;
 } Accel;
 
 typedef struct {
-  int xG;
-  int yG;
-  int zG;
+  float xG;
+  float yG;
+  float zG;
 } Gyro;
 
 typedef struct {
@@ -41,21 +44,22 @@ typedef struct {
   } gps;
  
   union {
-    Accel int_data;
-    uint8_t byte_data[6];
+    Accel float_data;
+    uint8_t byte_data[12];
   } accel;
   
   union {
-    Gyro int_data;
-    uint8_t byte_data[6];
+    Gyro float_data;
+    uint8_t byte_data[12];
   } gyro;
+  
 } sensorData;
 
 class SerialMaster{
   public:
 	void write_numbers(int , int);
 	void request_data(int);
-        
+        void trans_start();
   private:
 	sensorData _data;
 };

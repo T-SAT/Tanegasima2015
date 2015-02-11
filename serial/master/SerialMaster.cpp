@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include "serial_master.h"
+#include "SerialMaster.h"
 
 SerialMaster Master;
   
@@ -15,29 +15,27 @@ void SerialMaster::request_data(int select_num)
   int i=0;
   
   switch(select_num){
-  case ACCEL_NUM:  
+  case ACCEL_NUM:
     while(!Wire.available()){
       write_numbers(select_num, SLAVE_DEVICE_NUM);
       Wire.begin();
       Wire.requestFrom(SLAVE_DEVICE_NUM, ACCEL_REQUEST_BYTE);
     }
-
-    while(!Wire.available()) 
+    
+    while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, ACCEL_REQUEST_BYTE);
-  
+    }
+    
     while(Wire.available()){
       _data.accel.byte_data[i] = Wire.read();
       i++;
     }
+    
+    Serial.println(_data.accel.float_data.xA);
     break; 
 
   case GYRO_NUM:
-    while(!Wire.available()){
-      write_numbers(select_num, SLAVE_DEVICE_NUM);
-      Wire.begin();
-      Wire.requestFrom(SLAVE_DEVICE_NUM, GYRO_REQUEST_BYTE);
-    }
-
+    Serial.print(GYRO_NUM);
     while(!Wire.available()) 
       Wire.requestFrom(SLAVE_DEVICE_NUM, GYRO_REQUEST_BYTE);
   
@@ -48,12 +46,7 @@ void SerialMaster::request_data(int select_num)
    break;
    
   case GPS_NUM:
-    while(!Wire.available()){
-      write_numbers(select_num, SLAVE_DEVICE_NUM);
-      Wire.begin();
-      Wire.requestFrom(SLAVE_DEVICE_NUM, ACCEL_REQUEST_BYTE);
-    }
-
+    Serial.print(GPS_NUM);
     while(!Wire.available()) 
       Wire.requestFrom(SLAVE_DEVICE_NUM, ACCEL_REQUEST_BYTE);
   
@@ -66,4 +59,16 @@ void SerialMaster::request_data(int select_num)
    default :
      break;
   }
+}
+
+void SerialMaster::trans_start()
+{
+  byte check;
+  
+  do {
+    Serial.print(START);
+    delay(100);
+    check = Serial.read() - '0';
+  }while(check != RECIEVE);
+  
 }
