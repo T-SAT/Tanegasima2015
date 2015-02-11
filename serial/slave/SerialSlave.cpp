@@ -6,7 +6,7 @@ SerialSlave Slave;
 
 sensorData _data;
 
-void SerialSlave::select_func(int send_byte)
+void SerialSlave::select_func(void)
 {
   int select_num;
 
@@ -35,17 +35,18 @@ void SerialSlave::select_func(int send_byte)
 
 void SerialSlave::change_job(ring_buffer *buf)
 {
-  int check = 1;
-  
-  check = Serial.read();
+  byte check = 1;
+  noInterrupts();
+  check = Serial.read() - '0';
   
   if(check == START){
+    interrupts();
     Serial.print(RECIEVE);
     Wire.endTransmission();
-    Wire.begin(8);
-    Wire.onReceive(select_func);
+    Wire.begin(SLAVE_DEVICE_NUM);
+    Wire.onRequest(select_func);
   }
-
+  
 }
 
 void SerialSlave::send_GPS(void)
@@ -53,25 +54,22 @@ void SerialSlave::send_GPS(void)
   Wire.write(_data.gps.byte_data, sizeof(_data.gps.float_data));
   noInterrupts();
   Wire.endTransmission();
-  Wire.begin();
   IMU.sensorInit();
 }
 
 void SerialSlave::send_Accel(void)
 {
-  Wire.write(_data.accel.byte_data, sizeof(_data.accel.int_data));
+  Wire.write(_data.accel.byte_data, sizeof(_data.accel.float_data));
   noInterrupts();
   Wire.endTransmission();
-  Wire.begin();
   IMU.sensorInit();
 }
 
 void SerialSlave::send_Gyro(void)
 {
-  Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.int_data));
+  Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.float_data));
   noInterrupts();
   Wire.endTransmission();
-  Wire.begin();
   IMU.sensorInit();
 }
 
@@ -83,16 +81,16 @@ void SerialSlave::setData_GPS(float flat, float flon, unsigned long int age)
 
 void SerialSlave::setData_Accel(int x, int y, int z)
 {
-  _data.accel.int_data.xA = x;
-  _data.accel.int_data.yA = y;
-  _data.accel.int_data.zA = z;
+  _data.accel.float_data.xA = x;
+  _data.accel.float_data.yA = y;
+  _data.accel.float_data.zA = z;
 }
 
 void SerialSlave::setData_Gyro(int x, int y, int z)
 {
-  _data.gyro.int_data.xG = x;
-  _data.gyro.int_data.yG = y;
-  _data.gyro.int_data.zG = z;
+  _data.gyro.float_data.xG = x;
+  _data.gyro.float_data.yG = y;
+  _data.gyro.float_data.zG = z;
 }
 
 int SerialSlave::saveSD(sensorData data){
