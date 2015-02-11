@@ -10,7 +10,6 @@ void setup()
   Serial.begin(9600);
   Serial.setintr(Slave.change_job);
   IMU.sensorInit();
-  Wire.begin();
 }
 
 void loop()

@@ -7,9 +7,10 @@
 #include "WProgram.h"
 #endif
 
-#define GPS_NUM              1
-#define ACCEL_NUM            2
-#define GYRO_NUM             3
+#define GPS_NUM              (byte)1
+#define ACCEL_NUM            (byte)2
+#define GYRO_NUM             (byte)3
+
 #define ACCEL_REQUEST_BYTE   6
 #define GYRO_REQUEST_BYTE    6
 #define ERR_NUM              9
@@ -20,8 +21,10 @@
 #define INT_CFG 0x17
 #define PWR_MGM 0x3E
 
-#define START                0
-#define RECIEVE              1
+#define START                (byte)0
+#define RECIEVE              (byte)1
+
+#define SLAVE_DEVICE_NUM     8
 
 typedef struct {
   float flat;
@@ -58,8 +61,8 @@ typedef struct {
 } sensorData;
 
 class SerialSlave{
-  public:
-        static void select_func(int send_byte);
+  public :
+        static void select_func(byte select_num);
 	static void change_job(ring_buffer *);
       	static void send_GPS(void);
         static void send_Accel(void);

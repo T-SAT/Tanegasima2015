@@ -3,23 +3,17 @@
 #include "SensorStick_9DoF.h"
 
 SerialSlave Slave;
-
 sensorData _data;
 
-void SerialSlave::select_func(int send_byte)
+void SerialSlave::select_func(byte select_num)
 {
-  int select_num;
-
-  while(Wire.available()){
-     select_num = Wire.read();
-  }
-  
   switch (select_num) {
     case GPS_NUM:
-      Wire.onRequest(send_GPS);
+      Wire.onRequest(send_GPS);  
       break;
       
     case ACCEL_NUM:
+      interrupts();
       Wire.onRequest(send_Accel);
       break;
       
@@ -35,17 +29,24 @@ void SerialSlave::select_func(int send_byte)
 
 void SerialSlave::change_job(ring_buffer *buf)
 {
-  int check = 1;
+  byte intr_check;
   
-  check = Serial.read();
-  
-  if(check == START){
+  noInterrupts();
+  intr_check = Serial.read() - '0';
+
+  if(intr_check == START) {
+    interrupts();
     Serial.print(RECIEVE);
     Wire.endTransmission();
-    Wire.begin(8);
-    Wire.onReceive(select_func);
+    Wire.begin(SLAVE_DEVICE_NUM);
   }
-
+  
+  else {
+    interrupts();
+    Serial.print(intr_check);
+    select_func(intr_check);
+  }
+  
 }
 
 void SerialSlave::send_GPS(void)
@@ -53,16 +54,15 @@ void SerialSlave::send_GPS(void)
   Wire.write(_data.gps.byte_data, sizeof(_data.gps.float_data));
   noInterrupts();
   Wire.endTransmission();
-  Wire.begin();
   IMU.sensorInit();
 }
 
 void SerialSlave::send_Accel(void)
 {
+  Serial.println("check");
   Wire.write(_data.accel.byte_data, sizeof(_data.accel.int_data));
   noInterrupts();
   Wire.endTransmission();
-  Wire.begin();
   IMU.sensorInit();
 }
 
@@ -71,7 +71,6 @@ void SerialSlave::send_Gyro(void)
   Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.int_data));
   noInterrupts();
   Wire.endTransmission();
-  Wire.begin();
   IMU.sensorInit();
 }
 

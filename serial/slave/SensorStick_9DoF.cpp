@@ -4,6 +4,7 @@
 SensorStick_9DoF IMU;
   
 void SensorStick_9DoF::begin(){
+        Wire.endTransmission();
 	Wire.begin();
 	
 	//ADXL345 PowerOn
