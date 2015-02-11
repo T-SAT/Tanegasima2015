@@ -1,13 +1,15 @@
+//com4: master
+#include "serial_master.h"
+#include <Wire.h>
 
 void setup()
 {
   Serial.begin(9600);
-  Serial.setintr(test);
+  Wire.begin();
+  delay(5000);
 }
 
 void loop()
-{ 
-  Serial.println("please type some strings.");
-  delay(3000);
- 
+{
+  Master.request_data(ACCEL_NUM);
 }

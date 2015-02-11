@@ -8,9 +8,11 @@
 #endif
 
 #define SLAVE_DEVICE_NUM     8
+
 #define GPS_NUM              1
 #define ACCEL_NUM            2
 #define GYRO_NUM             3
+
 #define ACCEL_REQUEST_BYTE   6
 #define GYRO_REQUEST_BYTE    6
 #define ERR_NUM              9
@@ -47,15 +49,15 @@ typedef struct {
     Gyro int_data;
     uint8_t byte_data[6];
   } gyro;
-} I2C_sensor_data;
+} sensorData;
 
 class SerialMaster{
   public:
 	void write_numbers(int , int);
 	void request_data(int);
-
+        
   private:
-	  I2C_sensor_data sensorData;
+	sensorData _data;
 };
 
 extern SerialMaster Master;
