@@ -3,18 +3,18 @@
 #include "SensorStick_9DoF.h"
 
 SerialSlave Slave;
+
 sensorData _data;
 
 void SerialSlave::select_func(byte select_num)
-{
+{ 
   switch (select_num) {
     case GPS_NUM:
-      Wire.onRequest(send_GPS);  
+      Wire.onRequest(send_GPS);
       break;
       
     case ACCEL_NUM:
-      interrupts();
-      Wire.onRequest(send_Accel);
+      send_Accel();
       break;
       
     case GYRO_NUM:
@@ -29,24 +29,13 @@ void SerialSlave::select_func(byte select_num)
 
 void SerialSlave::change_job(ring_buffer *buf)
 {
-  byte intr_check;
+  byte select = 1;
   
   noInterrupts();
-  intr_check = Serial.read() - '0';
-
-  if(intr_check == START) {
-    interrupts();
-    Serial.print(RECIEVE);
-    Wire.endTransmission();
-    Wire.begin(SLAVE_DEVICE_NUM);
-  }
-  
-  else {
-    interrupts();
-    Serial.print(intr_check);
-    select_func(intr_check);
-  }
-  
+  select = Serial.read() - '0';
+  interrupts();
+  Serial.print(RECEIVE);
+  select_func(select);
 }
 
 void SerialSlave::send_GPS(void)
@@ -59,16 +48,18 @@ void SerialSlave::send_GPS(void)
 
 void SerialSlave::send_Accel(void)
 {
-  Serial.println("check");
-  Wire.write(_data.accel.byte_data, sizeof(_data.accel.int_data));
+  int i;
+  
+  _data.accel.float_data.xA = 13.32;
+  for(i=0; i<ACCEL_REQUEST_BYTE; i++){
+    Serial.print(_data.accel.byte_data[i]);
+  }
   noInterrupts();
-  Wire.endTransmission();
-  IMU.sensorInit();
 }
 
 void SerialSlave::send_Gyro(void)
 {
-  Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.int_data));
+  Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.float_data));
   noInterrupts();
   Wire.endTransmission();
   IMU.sensorInit();
@@ -82,16 +73,16 @@ void SerialSlave::setData_GPS(float flat, float flon, unsigned long int age)
 
 void SerialSlave::setData_Accel(int x, int y, int z)
 {
-  _data.accel.int_data.xA = x;
-  _data.accel.int_data.yA = y;
-  _data.accel.int_data.zA = z;
+  _data.accel.float_data.xA = x;
+  _data.accel.float_data.yA = y;
+  _data.accel.float_data.zA = z;
 }
 
 void SerialSlave::setData_Gyro(int x, int y, int z)
 {
-  _data.gyro.int_data.xG = x;
-  _data.gyro.int_data.yG = y;
-  _data.gyro.int_data.zG = z;
+  _data.gyro.float_data.xG = x;
+  _data.gyro.float_data.yG = y;
+  _data.gyro.float_data.zG = z;
 }
 
 int SerialSlave::saveSD(sensorData data){

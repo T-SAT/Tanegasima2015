@@ -11,8 +11,8 @@
 #define ACCEL_NUM            (byte)2
 #define GYRO_NUM             (byte)3
 
-#define ACCEL_REQUEST_BYTE   6
-#define GYRO_REQUEST_BYTE    6
+#define ACCEL_REQUEST_BYTE   12
+#define GYRO_REQUEST_BYTE    12
 #define ERR_NUM              9
 
 #define GYRO_ADDR 0x68 // gyro address, binary = 11101001 when AD0 is connected to Vcc (see schematics of your breakout board)
@@ -22,9 +22,9 @@
 #define PWR_MGM 0x3E
 
 #define START                (byte)0
-#define RECIEVE              (byte)1
+#define RECEIVE              (byte)1
 
-#define SLAVE_DEVICE_NUM     8
+#define SLAVE_DEVICE_NUM           8
 
 typedef struct {
   float flat;
@@ -32,15 +32,15 @@ typedef struct {
 } GPS;
 
 typedef struct {
-  int xA;
-  int yA;
-  int zA;
+  float xA;
+  float yA;
+  float zA;
 } Accel;
 
 typedef struct {
-  int xG;
-  int yG;
-  int zG;
+  float xG;
+  float yG;
+  float zG;
 } Gyro;
 
 typedef struct {
@@ -50,20 +50,20 @@ typedef struct {
   } gps;
  
   union {
-    Accel int_data;
-    uint8_t byte_data[6];
+    Accel float_data;
+    uint8_t byte_data[12];
   } accel;
   
   union {
-    Gyro int_data;
-    uint8_t byte_data[6];
+    Gyro float_data;
+    uint8_t byte_data[12];
   } gyro;
 } sensorData;
 
 class SerialSlave{
-  public :
+  public:
         static void select_func(byte select_num);
-	static void change_job(ring_buffer *);
+	static void change_job(ring_buffer *buf);
       	static void send_GPS(void);
         static void send_Accel(void);
 	static void send_Gyro(void);

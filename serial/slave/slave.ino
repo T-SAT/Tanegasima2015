@@ -26,6 +26,8 @@ void loop()
   accYval = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');  //オフセットぶんを差し引く
   accZval = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');  //オフセットぶんを差し引く
   
+  Serial.println(accXval);
+  delay(1000);
   Slave.setData_Gyro(gyroX, gyroY, gyroZ);
   Slave.setData_Accel(accXval, accYval, accZval);
   interrupts();
