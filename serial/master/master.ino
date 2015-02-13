@@ -11,6 +11,5 @@ void setup()
 
 void loop()
 {
-  Master.trans_start();
   Master.request_data(ACCEL_NUM);
 }

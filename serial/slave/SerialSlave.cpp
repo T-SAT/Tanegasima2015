@@ -6,20 +6,16 @@ SerialSlave Slave;
 
 sensorData _data;
 
-void SerialSlave::select_func(void)
-{
-  int select_num;
-
-  while(Wire.available()){
-     select_num = Wire.read();
-  }
-  
+void SerialSlave::select_func(byte select_num)
+{ 
+  Serial.println("check");
   switch (select_num) {
     case GPS_NUM:
       Wire.onRequest(send_GPS);
       break;
       
     case ACCEL_NUM:
+      Serial.println("check1");
       Wire.onRequest(send_Accel);
       break;
       
@@ -35,18 +31,15 @@ void SerialSlave::select_func(void)
 
 void SerialSlave::change_job(ring_buffer *buf)
 {
-  byte check = 1;
+  byte select = 1;
+  
   noInterrupts();
-  check = Serial.read() - '0';
-  
-  if(check == START){
-    interrupts();
-    Serial.print(RECIEVE);
-    Wire.endTransmission();
-    Wire.begin(SLAVE_DEVICE_NUM);
-    Wire.onRequest(select_func);
-  }
-  
+  select = Serial.read() - '0';
+  interrupts();
+  Serial.print(RECIEVE);
+  Wire.endTransmission();
+  Wire.begin(SLAVE_DEVICE_NUM);
+  select_func(select);
 }
 
 void SerialSlave::send_GPS(void)
@@ -59,9 +52,12 @@ void SerialSlave::send_GPS(void)
 
 void SerialSlave::send_Accel(void)
 {
-  Wire.write(_data.accel.byte_data, sizeof(_data.accel.float_data));
-  noInterrupts();
+  int i;
+  
+  _data.accel.float_data.xA = 13.32;
+  Wire.write(_data.accel.byte_data, sizeof(_data.accel.byte_data));
   Wire.endTransmission();
+  noInterrupts();
   IMU.sensorInit();
 }
 

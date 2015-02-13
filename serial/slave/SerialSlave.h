@@ -11,9 +11,9 @@
 #define ACCEL_NUM            (byte)2
 #define GYRO_NUM             (byte)3
 
-#define ACCEL_REQUEST_BYTE   (byte)6
-#define GYRO_REQUEST_BYTE    (byte)6
-#define ERR_NUM              (byte)9
+#define ACCEL_REQUEST_BYTE   12
+#define GYRO_REQUEST_BYTE    12
+#define ERR_NUM              9
 
 #define GYRO_ADDR 0x68 // gyro address, binary = 11101001 when AD0 is connected to Vcc (see schematics of your breakout board)
 #define SMPLRT_DIV 0x15
@@ -62,8 +62,8 @@ typedef struct {
 
 class SerialSlave{
   public:
-        static void select_func(void);
-	static void change_job(ring_buffer *);
+        static void select_func(byte select_num);
+	static void change_job(ring_buffer *buf);
       	static void send_GPS(void);
         static void send_Accel(void);
 	static void send_Gyro(void);

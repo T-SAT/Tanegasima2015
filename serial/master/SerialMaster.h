@@ -13,8 +13,8 @@
 #define ACCEL_NUM            (byte)2
 #define GYRO_NUM             (byte)3
 
-#define ACCEL_REQUEST_BYTE         6
-#define GYRO_REQUEST_BYTE          6
+#define ACCEL_REQUEST_BYTE         12
+#define GYRO_REQUEST_BYTE          12
 #define ERR_NUM                    9
 
 #define START                (byte)0
@@ -58,8 +58,7 @@ typedef struct {
 class SerialMaster{
   public:
 	void write_numbers(int , int);
-	void request_data(int);
-        void trans_start();
+	void request_data(byte);
   private:
 	sensorData _data;
 };
