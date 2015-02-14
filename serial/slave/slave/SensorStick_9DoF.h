@@ -112,8 +112,8 @@ class SensorStick_9DoF{
     double getZero(char sensor,char axis);
     int setZero(char sensor,char axis,double zero[]);
     int setZero(double acc[],double gyro[],double mag[]);
-    void recvGPS(float flat, float flon, unsigned long int age);
-    float getDt();
+    
+
   private:
     void twiWrite(byte address, byte registerAddress, byte val);
     void twiWrite(byte address, byte registerAddress, byte val[], byte num);
