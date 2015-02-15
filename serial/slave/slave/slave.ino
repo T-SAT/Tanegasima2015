@@ -3,31 +3,6 @@
 #include "SensorStick_9DoF.h"
 #include "SerialSlave.h"
 
-#define START               '0'
-#define RECEIVE             '1'
-
-#define DATA_1              '1'
-#define DATA_2              '2'
-#define DATA_3              '3'
-
-#define SLAVE_DEVICE_NUM     2
-typedef struct {
-  float f_data11;
-  float f_data12;
-  float f_data13;
-} accel;
-
-typedef union {
-  accel f_data1;
-  uint8_t data[sizeof(float)*3];
-} test_u;
-
-test_u tmp;
-double gyroX, gyroY, gyroZ;
-double accXval, accYval, accZval;
-
-sensorData _data1;
-
 void setup()
 {  
   Serial.begin(9600);
@@ -37,6 +12,9 @@ void setup()
 
 void loop()
 {
+  double gyroX, gyroY, gyroZ;
+  double accXval, accYval, accZval;
+  
   IMU.receiveAcc();
   IMU.receiveGyro();
   gyroX   = IMU.get(GYR,'x') - IMU.getZero(GYR,'x');  //オフセットぶんを差し引く
