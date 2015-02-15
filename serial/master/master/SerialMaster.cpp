@@ -36,7 +36,7 @@ void SerialMaster::request_data(char select_num)
       _data.accel.byte_data[i] = Wire.read();
       i++;
     }
-    Serial.println(_data.accel.float_data.xA);
+    Serial.println(_data.gyro.float_data.xG);
     break;
     
   case GYRO_NUM:

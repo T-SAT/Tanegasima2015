@@ -30,6 +30,6 @@ void setup()
 
 void loop()
 {
-  Master.request_data(ACCEL_NUM);
+  Master.request_data(GYRO_NUM);
 }
 
