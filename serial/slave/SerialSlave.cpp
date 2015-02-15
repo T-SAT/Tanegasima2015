@@ -94,7 +94,7 @@ int SerialSlave::saveSD(sensorData data, unsigned long int time){
   
   if(saveFile) {
     if(initFlag == 0) {
-      saveFile.println("xA,yA,zA,xG,yG,zG,time");
+      saveFile.println("xA,yA,zA,xG,yG,zG,LAT,LON,AGE,time");
       saveFile.close();
       initFlag = 1;
     }
@@ -112,7 +112,16 @@ int SerialSlave::saveSD(sensorData data, unsigned long int time){
       saveFile.print(",");
       saveFile.print(data.gyro.float_data.zG);
       saveFile.print(",");
+      saveFile.print(data.gps.gps_data.flat);
+      saveFile.print(",");
+      saveFile.print(data.gps.gps_data.flon);
+      saveFile.print(",");
+      saveFile.print(data.gps.gps_data.flat);
+      saveFile.print(",");
+      saveFile.print(data.gps.gps_data.age);
+      saveFile.print(",");
       saveFile.println(time);
+      saveFile.close();
     }
   }
   
