@@ -15,27 +15,31 @@ void SerialSlave::receive_data(ring_buffer *buf)
   Serial.print(RECEIVE);
   Wire.begin(SLAVE_DEVICE_NUM);
   
-  switch(check){
-  case GPS_NUM:
-    Wire.onRequest(send_GPS);
-    break;
+  if(check == GPS_NUM || check == ACCEL_NUM || check == GYRO_NUM){
+    switch(check){
+    case GPS_NUM:
+      Wire.onRequest(send_GPS);
+      break;
   
-  case ACCEL_NUM:
-    Wire.onRequest(send_Accel);
-    break;
+    case ACCEL_NUM:
+      Wire.onRequest(send_Accel);
+      Serial.print(START);
+      break;
     
-  case GYRO_NUM:
-    Wire.onRequest(send_Gyro);
-    break;
+    case GYRO_NUM:
+      Wire.onRequest(send_Gyro);
+      break;
     
-  default:
-    break; 
+    default :
+      break; 
+    }
   }
+  
 }
 
 void SerialSlave::send_GPS(void)
 {
-  Wire.write(_data.gps.byte_data, sizeof(_data.gps.float_data));
+  Wire.write(_data.gps.byte_data, sizeof(_data.gps.byte_data));
   IMU.sensorInit();
 }
 
@@ -54,8 +58,9 @@ void SerialSlave::send_Gyro(void)
 
 void SerialSlave::setData_GPS(float flat, float flon, unsigned long int age)
 {
-  _data.gps.float_data.flat = flat;
-  _data.gps.float_data.flon = flon;
+  _data.gps.gps_data.flat = flat;
+  _data.gps.gps_data.flon = flon;
+  _data.gps.gps_data.age = age;
 }
 
 void SerialSlave::setData_Accel(float x, float y, float z)

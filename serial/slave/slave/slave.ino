@@ -45,11 +45,6 @@ void loop()
   accXval = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
   accYval = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');  //オフセットぶんを差し引く
   accZval = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');  //オフセットぶんを差し引く
-/*
-  Serial.println(accXval);
-  Serial.println(accYval);
-  Serial.println(accZval);
-  */
   test.accel.float_data.xA = accXval;
   test.accel.float_data.yA = accYval;
   test.accel.float_data.zA = accZval;
@@ -75,7 +70,7 @@ void send_Gyro(void)
 void send_GPS(void)
 {
   Serial.print("tmp.f_data = ");
-  Serial.println(test.gps.float_data.flat);
+  Serial.println(test.gps.gps_data.flat);
   Wire.write(test.gps.byte_data, sizeof(test.gps.byte_data));
   delay(1000);
 }

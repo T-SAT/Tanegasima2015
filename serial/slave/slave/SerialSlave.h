@@ -7,23 +7,18 @@
 #include "WProgram.h"
 #endif
 
-
-#define GPS_NUM              (byte)1
-#define ACCEL_NUM            (byte)2
-#define GYRO_NUM             (byte)3
-
-#define ACCEL_REQUEST_BYTE   12
-#define GYRO_REQUEST_BYTE    12
-#define ERR_NUM              9
+#define SLAVE_DEVICE_NUM           2
 
 #define GPS_NUM                   '1'
 #define ACCEL_NUM                 '2'
 #define GYRO_NUM                  '3'
 
-#define ACCEL_REQUEST_BYTE        12
-#define GYRO_REQUEST_BYTE         12
+#define ACCEL_REQUEST_BYTE         12
+#define GYRO_REQUEST_BYTE          12
 #define ERR_NUM                    9
 
+#define START                      '0'
+#define RECEIVE                    '1'
 
 #define GYRO_ADDR 0x68 // gyro address, binary = 11101001 when AD0 is connected to Vcc (see schematics of your breakout board)
 #define SMPLRT_DIV 0x15
@@ -31,21 +26,10 @@
 #define INT_CFG 0x17
 #define PWR_MGM 0x3E
 
-
-#define START                (byte)0
-#define RECEIVE              (byte)1
-
-#define SLAVE_DEVICE_NUM           8
-
-#define START                     '0'
-#define RECEIVE                   '1'
-
-#define SLAVE_DEVICE_NUM           2
-
-
 typedef struct {
   float flat;
   float flon;
+  unsigned long int age;
 } GPS;
 
 typedef struct {
@@ -62,7 +46,7 @@ typedef struct {
 
 typedef struct {
   union {
-    GPS float_data;
+    GPS gps_data;
     uint8_t byte_data[8];
   } gps;
  
@@ -75,6 +59,7 @@ typedef struct {
     Gyro float_data;
     uint8_t byte_data[12];
   } gyro;
+  
 } sensorData;
 
 class SerialSlave{
