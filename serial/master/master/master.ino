@@ -49,7 +49,7 @@ void request_data(char select_num)
     
   while(!Wire.available()){
     Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
-    delay(50);
+    delay(70);
   }
   
   while(Wire.available()){
@@ -57,7 +57,6 @@ void request_data(char select_num)
     i++;
   }
   
-  //Serial.print("test1.f_data.f_data1 = ");
   Serial.println(test1.f_data.f_data1);
 }
  
