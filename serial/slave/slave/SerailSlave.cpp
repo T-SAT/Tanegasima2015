@@ -19,6 +19,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
     switch(check){
     case GPS_NUM:
       Wire.onRequest(send_GPS);
+      Serial.print(START);
       break;
   
     case ACCEL_NUM:
@@ -28,6 +29,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
     
     case GYRO_NUM:
       Wire.onRequest(send_Gyro);
+      Serial.print(START);
       break;
     
     default :
@@ -40,7 +42,8 @@ void SerialSlave::receive_data(ring_buffer *buf)
 void SerialSlave::send_GPS(void)
 {
   Wire.write(_data.gps.byte_data, sizeof(_data.gps.byte_data));
-  IMU.sensorInit();
+  Wire.begin();
+  noInterrupts();
 }
 
 void SerialSlave::send_Accel(void)
@@ -52,8 +55,9 @@ void SerialSlave::send_Accel(void)
 
 void SerialSlave::send_Gyro(void)
 {
-  Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.float_data));
+  Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.byte_data));
   Wire.begin();
+  noInterrupts();
 }
 
 void SerialSlave::setData_GPS(float flat, float flon, unsigned long int age)
