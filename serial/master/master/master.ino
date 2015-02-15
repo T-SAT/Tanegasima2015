@@ -1,5 +1,6 @@
 //com10: master
 #include <Wire.h>
+#include "SerialMaster.h"
 
 #define START                 '0'
 #define RECEIVE               '1'
@@ -29,35 +30,6 @@ void setup()
 
 void loop()
 {
-  request_data(ACCEL_NUM);
+  Master.request_data(ACCEL_NUM);
 }
 
-void request_data(char select_num)
-{
-  test_u test1;
-  int i=0;
-  byte check = '0';
-  
-  while(check != RECEIVE){
-    Serial.print(select_num);
-    delay(60);
-    check = Serial.read();
-  }
-  
-  while(check != START)
-    check = Serial.read();
-    
-  while(!Wire.available()){
-    Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
-    delay(70);
-  }
-  
-  while(Wire.available()){
-    test1.data[i] = Wire.read();
-    i++;
-  }
-  
-  Serial.println(test1.f_data.f_data1);
-}
- 
-  
