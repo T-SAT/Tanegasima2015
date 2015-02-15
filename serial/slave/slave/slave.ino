@@ -53,17 +53,15 @@ void loop()
   test.accel.float_data.xA = accXval;
   test.accel.float_data.yA = accYval;
   test.accel.float_data.zA = accZval;
-  
+  interrupts();
   delay(100);
 }
 
 void send_Accel(void)
 {
-  //Serial.print("tmp.f_data = ");
-  //Serial.println(test.accel.float_data.xA);
   Wire.write(test.accel.byte_data, sizeof(test.accel.byte_data));
   Wire.begin();
-  //delay(1000);
+  noInterrupts();
 }
 
 void send_Gyro(void)

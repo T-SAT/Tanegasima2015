@@ -40,7 +40,7 @@ void request_data(char select_num)
   
   while(check != RECEIVE){
     Serial.print(select_num);
-    delay(100);
+    delay(60);
     check = Serial.read();
   }
   
@@ -49,7 +49,7 @@ void request_data(char select_num)
     
   while(!Wire.available()){
     Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
-    delay(100);
+    delay(50);
   }
   
   while(Wire.available()){
