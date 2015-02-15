@@ -62,7 +62,7 @@ void send_Accel(void)
   Serial.println(test.accel.float_data.xA);
   Wire.write(test.accel.byte_data, sizeof(test.accel.byte_data));
   Wire.begin();
-  delay(1000);
+  //delay(1000);
 }
 
 void send_Gyro(void)
