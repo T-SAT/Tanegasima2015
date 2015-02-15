@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <SD.h>
 #include "SerialSlave.h"
 #include "SensorStick_9DoF.h"
 
@@ -81,7 +82,44 @@ void SerialSlave::setData_Gyro(float x, float y, float z)
   _data.gyro.float_data.zG = z;
 }
 
-int SerialSlave::saveSD(sensorData data){
+int SerialSlave::saveSD(sensorData data, unsigned long int time){
+  File saveFile;
+  static int initFlag=0;
+  
+  if(!SD.begin(4)) {
+    return(-1);
+  }
+  
+  saveFile = SD.open("data_log.txt", FILE_WRITE);
+  
+  if(saveFile) {
+    if(initFlag == 0) {
+      saveFile.println("xA,yA,zA,xG,yG,zG,time");
+      saveFile.close();
+      initFlag = 1;
+    }
+    
+    else {
+      saveFile.print(data.accel.float_data.xA);
+      saveFile.print(",");
+      saveFile.print(data.accel.float_data.yA);
+      saveFile.print(",");
+      saveFile.print(data.accel.float_data.zA);
+      saveFile.print(",");
+      saveFile.print(data.gyro.float_data.xG);
+      saveFile.print(",");
+      saveFile.print(data.gyro.float_data.yG);
+      saveFile.print(",");
+      saveFile.print(data.gyro.float_data.zG);
+      saveFile.print(",");
+      saveFile.println(time);
+    }
+  }
+  
+  else {
+    return(-1);
+  }
+  
   return(0);
 }
 

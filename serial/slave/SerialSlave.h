@@ -74,7 +74,7 @@ class SerialSlave{
         static void setData_GPS(float flat, float flon, unsigned long int age);
         static void setData_Accel(float x, float y, float z);
         static void setData_Gyro(float x, float y, float z);
-	int saveSD(sensorData data);
+	int saveSD(sensorData data, unsigned long int time);
 };
 
 extern SerialSlave Slave;
