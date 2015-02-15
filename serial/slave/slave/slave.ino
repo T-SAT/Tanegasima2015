@@ -3,6 +3,7 @@
 #include "SensorStick_9DoF.h"
 #include "SerialSlave.h"
 
+#define START               '0'
 #define RECEIVE             '1'
 
 #define DATA_1              '1'
@@ -58,8 +59,8 @@ void loop()
 
 void send_Accel(void)
 {
-  Serial.print("tmp.f_data = ");
-  Serial.println(test.accel.float_data.xA);
+  //Serial.print("tmp.f_data = ");
+  //Serial.println(test.accel.float_data.xA);
   Wire.write(test.accel.byte_data, sizeof(test.accel.byte_data));
   Wire.begin();
   //delay(1000);
@@ -90,7 +91,9 @@ void receive_data(ring_buffer *buf)
 {
   char check;
   
+  noInterrupts();
   check = Serial.read();
+  interrupts();
   Serial.print(RECEIVE);
   Wire.begin(SLAVE_DEVICE_NUM);
   
@@ -102,6 +105,7 @@ void receive_data(ring_buffer *buf)
   
     case ACCEL_NUM:
       Wire.onRequest(send_Accel);
+      Serial.print(START);
       break;
     
     case GYRO_NUM:

@@ -9,7 +9,9 @@ void SerialSlave::receive_data(ring_buffer *buf)
 {
   char check;
   
+  noInterrupts();
   check = Serial.read();
+  interrupts();
   Serial.print(RECEIVE);
   Wire.begin(SLAVE_DEVICE_NUM);
   

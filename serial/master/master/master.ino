@@ -1,6 +1,7 @@
 //com10: master
 #include <Wire.h>
 
+#define START                 '0'
 #define RECEIVE               '1'
 
 #define GPS_NUM               '1'
@@ -43,8 +44,13 @@ void request_data(char select_num)
     check = Serial.read();
   }
   
-  while(!Wire.available())
+  while(check != START)
+    check = Serial.read();
+    
+  while(!Wire.available()){
     Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
+    delay(100);
+  }
   
   while(Wire.available()){
     test1.data[i] = Wire.read();
