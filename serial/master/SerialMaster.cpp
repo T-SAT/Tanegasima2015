@@ -18,43 +18,52 @@ void SerialMaster::request_data(char select_num)
   
   while(check != RECEIVE){
     Serial.print(select_num);
-    delay(100);
+    delay(60);
     check = Serial.read();
   }
   
+  while(check != START)
+    check = Serial.read();
+  
   switch(select_num){
   case ACCEL_NUM:
-    while(!Wire.available())
+    while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
+      delay(75);
+    }
   
     while(Wire.available()){
       _data.accel.byte_data[i] = Wire.read();
       i++;
     }
+    Serial.println(_data.gyro.float_data.xG);
     break;
     
   case GYRO_NUM:
-    while(!Wire.available())
+    while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
-      
-      while(Wire.available()){
-        _data.gyro.byte_data[i] = Wire.read();
-        i++;
-      }
-      break;
-     
-  case GPS_NUM:
-    while(!Wire.available())
-      Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
-      
-      while(Wire.available()){
-        _data.gps.byte_data[i] = Wire.read();
-        i++;
-      }
-      break;
-  }
+      delay(70);
+    }
   
-  Serial.print("test1.f_data.f_data1 = ");
-  Serial.println(_data.accel.float_data.xA);
+    while(Wire.available()){
+      _data.gyro.byte_data[i] = Wire.read();
+      i++;
+    }
+    Serial.println(_data.gyro.float_data.xG);
+    break;
+ 
+  case GPS_NUM:
+    while(!Wire.available()){
+      Wire.requestFrom(SLAVE_DEVICE_NUM, (sizeof(float)*2+sizeof(unsigned long int)));
+      delay(70);
+    }
+  
+    while(Wire.available()){
+      _data.gps.byte_data[i] = Wire.read();
+      i++;
+    }
+    Serial.println(_data.gps.gps_data.flat);
+    break;
+  }  
+  
 }
-

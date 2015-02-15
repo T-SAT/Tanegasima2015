@@ -24,6 +24,7 @@
 typedef struct {
   float flat;
   float flon;
+  unsigned long int age;
 } GPS;
 
 typedef struct {
@@ -40,7 +41,7 @@ typedef struct {
 
 typedef struct {
   union {
-    GPS float_data;
+    GPS gps_data;
     uint8_t byte_data[8];
   } gps;
  
