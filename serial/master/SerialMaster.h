@@ -13,6 +13,7 @@
 #define GPS_NUM                   '1'
 #define ACCEL_NUM                 '2'
 #define GYRO_NUM                  '3'
+#define ALL_NUM                   '4'
 
 #define ACCEL_REQUEST_BYTE         12
 #define GYRO_REQUEST_BYTE          12
@@ -40,9 +41,10 @@ typedef struct {
 } Gyro;
 
 typedef struct {
+  uint8_t byte_data[36];
   union {
     GPS gps_data;
-    uint8_t byte_data[8];
+    uint8_t byte_data[12];
   } gps;
  
   union {
@@ -53,8 +55,7 @@ typedef struct {
   union {
     Gyro float_data;
     uint8_t byte_data[12];
-  } gyro;
-  
+  } gyro;  
 } sensorData;
 
 class SerialMaster{

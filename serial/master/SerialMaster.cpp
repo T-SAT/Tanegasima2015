@@ -64,6 +64,22 @@ void SerialMaster::request_data(char select_num)
     }
     Serial.println(_data.gps.gps_data.flat);
     break;
+    
+    case ALL_NUM:
+      while(!Wire.available()){
+        Wire.requestFrom(SLAVE_DEVICE_NUM, (sizeof(float)*11 + sizeof(unsigned long int)));
+        delay(70);
+      }
+      
+      while(Wire.available()){
+        _data.byte_data[i] = Wire.read();
+        i++;
+      }
+      Serial.println(_data.gyro.float_data.xG);
+      break;
+      
+    default :
+      break;
   }  
   
 }
