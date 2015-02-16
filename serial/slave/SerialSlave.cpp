@@ -33,6 +33,11 @@ void SerialSlave::receive_data(ring_buffer *buf)
       Serial.print(START);
       break;
     
+    case ALL_NUM:
+      Wire.onRequest(send_All);
+      Serial.print(START);
+      break;
+      
     default :
       break; 
     }
@@ -57,6 +62,13 @@ void SerialSlave::send_Accel(void)
 void SerialSlave::send_Gyro(void)
 {
   Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.byte_data));
+  Wire.begin();
+  noInterrupts();
+}
+
+void SerialSlave::send_All(void)
+{
+  Wire.write(_data.byte_data, sizeof(_data.byte_data));
   Wire.begin();
   noInterrupts();
 }

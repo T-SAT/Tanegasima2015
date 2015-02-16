@@ -12,6 +12,7 @@
 #define GPS_NUM                   '1'
 #define ACCEL_NUM                 '2'
 #define GYRO_NUM                  '3'
+#define ALL_NUM                   '4'
 
 #define ACCEL_REQUEST_BYTE         12
 #define GYRO_REQUEST_BYTE          12
@@ -45,9 +46,10 @@ typedef struct {
 } Gyro;
 
 typedef struct {
+  uint8_t byte_data[36];
   union {
     GPS gps_data;
-    uint8_t byte_data[8];
+    uint8_t byte_data[12];
   } gps;
  
   union {
@@ -71,6 +73,7 @@ class SerialSlave{
       	static void send_GPS(void);
         static void send_Accel(void);
 	static void send_Gyro(void);
+        static void send_All(void);
         static void setData_GPS(float flat, float flon, unsigned long int age);
         static void setData_Accel(float x, float y, float z);
         static void setData_Gyro(float x, float y, float z);
