@@ -4,9 +4,6 @@
 
 KalmanFilter Kalman;
 
-float quat[4] = {1.0f,0.0f,0.0f,0.0f};
-float beta = 0.6f;
-
 double KalmanFilter::getDt(void)
 {
   static long lastTime=0;
