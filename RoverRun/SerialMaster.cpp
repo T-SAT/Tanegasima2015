@@ -15,15 +15,23 @@ void SerialMaster::request_data(char select_num)
 {
   int i=0;
   byte check = '0';
+  unsigned long int time;
   
+  time = millis();
   while(check != RECEIVE){
     Serial.print(select_num);
     delay(65);
     check = Serial.read();
+    if(30000 < millis() - time)
+      break; 
   }
   
-  while(check != START)
+  time = millis();
+  while(check != START){
     check = Serial.read();
+    if(30000 < millis() - time)
+      break;
+  }
   
   switch(select_num){
   case ACCEL_NUM:
