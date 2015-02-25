@@ -16,7 +16,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
   Serial.print(RECEIVE);
   Wire.begin(SLAVE_DEVICE_NUM);
   
-  if(check == GPS_NUM || check == ACCEL_NUM || check == GYRO_NUM){
+  if(check == GPS_NUM || check == ACCEL_NUM || check == GYRO_NUM || check == ALL_NUM){
     switch(check){
     case GPS_NUM:
       Wire.onRequest(send_GPS);
@@ -47,21 +47,21 @@ void SerialSlave::receive_data(ring_buffer *buf)
 
 void SerialSlave::send_GPS(void)
 {
-  Wire.write(_data.gps.byte_data, sizeof(_data.gps.byte_data));
+  Wire.write(_data.Data.gps.byte_data, sizeof(_data.Data.gps.byte_data));
   Wire.begin();
   noInterrupts();
 }
 
 void SerialSlave::send_Accel(void)
 { 
-  Wire.write(_data.accel.byte_data, sizeof(_data.accel.byte_data));
+  Wire.write(_data.Data.accel.byte_data, sizeof(_data.Data.accel.byte_data));
   Wire.begin();
   noInterrupts();
 }
 
 void SerialSlave::send_Gyro(void)
 {
-  Wire.write(_data.gyro.byte_data, sizeof(_data.gyro.byte_data));
+  Wire.write(_data.Data.gyro.byte_data, sizeof(_data.Data.gyro.byte_data));
   Wire.begin();
   noInterrupts();
 }
@@ -73,25 +73,24 @@ void SerialSlave::send_All(void)
   noInterrupts();
 }
 
-void SerialSlave::setData_GPS(float flat, float flon, unsigned long int age)
+void SerialSlave::setData_GPS(float flat, float flon)
 {
-  _data.gps.gps_data.flat = flat;
-  _data.gps.gps_data.flon = flon;
-  _data.gps.gps_data.age = age;
+  _data.Data.gps.gps_data.flat = flat;
+  _data.Data.gps.gps_data.flon = flon;
 }
 
 void SerialSlave::setData_Accel(float x, float y, float z)
 {
-  _data.accel.float_data.xA = x;
-  _data.accel.float_data.yA = y;
-  _data.accel.float_data.zA = z;
+  _data.Data.accel.float_data.xA = x;
+  _data.Data.accel.float_data.yA = y;
+  _data.Data.accel.float_data.zA = z;
 }
 
 void SerialSlave::setData_Gyro(float x, float y, float z)
 {
-  _data.gyro.float_data.xG = x;
-  _data.gyro.float_data.yG = y;
-  _data.gyro.float_data.zG = z;
+  _data.Data.gyro.float_data.xG = x;
+  _data.Data.gyro.float_data.yG = y;
+  _data.Data.gyro.float_data.zG = z;
 }
 
 int SerialSlave::saveSD(sensorData data, unsigned long int time){
@@ -112,25 +111,23 @@ int SerialSlave::saveSD(sensorData data, unsigned long int time){
     }
     
     else {
-      saveFile.print(data.accel.float_data.xA);
+      saveFile.print(data.Data.accel.float_data.xA);
       saveFile.print(",");
-      saveFile.print(data.accel.float_data.yA);
+      saveFile.print(data.Data.accel.float_data.yA);
       saveFile.print(",");
-      saveFile.print(data.accel.float_data.zA);
+      saveFile.print(data.Data.accel.float_data.zA);
       saveFile.print(",");
-      saveFile.print(data.gyro.float_data.xG);
+      saveFile.print(data.Data.gyro.float_data.xG);
       saveFile.print(",");
-      saveFile.print(data.gyro.float_data.yG);
+      saveFile.print(data.Data.gyro.float_data.yG);
       saveFile.print(",");
-      saveFile.print(data.gyro.float_data.zG);
+      saveFile.print(data.Data.gyro.float_data.zG);
       saveFile.print(",");
-      saveFile.print(data.gps.gps_data.flat);
+      saveFile.print(data.Data.gps.gps_data.flat);
       saveFile.print(",");
-      saveFile.print(data.gps.gps_data.flon);
+      saveFile.print(data.Data.gps.gps_data.flon);
       saveFile.print(",");
-      saveFile.print(data.gps.gps_data.flat);
-      saveFile.print(",");
-      saveFile.print(data.gps.gps_data.age);
+      saveFile.print(data.Data.gps.gps_data.flat);
       saveFile.print(",");
       saveFile.println(time);
       saveFile.close();
@@ -143,5 +140,4 @@ int SerialSlave::saveSD(sensorData data, unsigned long int time){
   
   return(0);
 }
-
 

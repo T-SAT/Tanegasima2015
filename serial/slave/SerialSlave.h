@@ -21,6 +21,8 @@
 #define START                      '0'
 #define RECEIVE                    '1'
 
+#define PARA_PIN                    6
+
 #define GYRO_ADDR 0x68 // gyro address, binary = 11101001 when AD0 is connected to Vcc (see schematics of your breakout board)
 #define SMPLRT_DIV 0x15
 #define DLPF_FS 0x16
@@ -30,7 +32,6 @@
 typedef struct {
   float flat;
   float flon;
-  unsigned long int age;
 } GPS;
 
 typedef struct {
@@ -45,28 +46,28 @@ typedef struct {
   float zG;
 } Gyro;
 
-typedef struct {
-  uint8_t byte_data[36];
-  union {
-    GPS gps_data;
-    uint8_t byte_data[12];
-  } gps;
+typedef union {
+  uint8_t byte_data[32];
+  struct {
+    union {
+      GPS gps_data;
+      uint8_t byte_data[8];
+    } gps;
  
-  union {
-    Accel float_data;
-    uint8_t byte_data[12];
-  } accel;
+    union {
+      Accel float_data;
+      uint8_t byte_data[12];
+    } accel;
   
-  union {
-    Gyro float_data;
-    uint8_t byte_data[12];
-  } gyro;
-  
+    union {
+      Gyro float_data;
+      uint8_t byte_data[12];
+    } gyro;
+  } Data;
 } sensorData;
 
 class SerialSlave{
   public:
-
         static void select_func(byte select_num);
 	static void change_job(ring_buffer *buf);
         static void receive_data(ring_buffer *buf);
@@ -74,7 +75,7 @@ class SerialSlave{
         static void send_Accel(void);
 	static void send_Gyro(void);
         static void send_All(void);
-        static void setData_GPS(float flat, float flon, unsigned long int age);
+        static void setData_GPS(float flat, float flon);
         static void setData_Accel(float x, float y, float z);
         static void setData_Gyro(float x, float y, float z);
 	int saveSD(sensorData data, unsigned long int time);
@@ -83,3 +84,5 @@ class SerialSlave{
 extern SerialSlave Slave;
 
 #endif
+
+

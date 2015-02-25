@@ -11,7 +11,6 @@
 #define GYR 1
 #define MAG 2
 
-#define GYRO_SENSITIVITY 14.375
 
 const double accSensityivity[3] = {32.99, 33.14, 32.27};
 const double gyroSensityivity[3] = {14.375, 14.375, 14.375};
@@ -113,7 +112,6 @@ class SensorStick_9DoF{
     int setZero(char sensor,char axis,double zero[]);
     int setZero(double acc[],double gyro[],double mag[]);
     
-
   private:
     void twiWrite(byte address, byte registerAddress, byte val);
     void twiWrite(byte address, byte registerAddress, byte val[], byte num);
