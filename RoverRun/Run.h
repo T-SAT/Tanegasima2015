@@ -10,6 +10,10 @@
 #define ROVER_R     0.09 //[m]
 #define WHEEL_R     0.07 //[m]
 
+#define REDLINE_R 6378137
+#define E_2 0.00335281*2 - 0.00335281*0.00335281
+#define N(a) 6378137 / sqrt( 1.0 - (0.00335281*2 - 0.00335281*0.00335281)*sin(a)*sin(a) )
+
 typedef struct {
   double matrix3TO3[3][3];
   double vector3TO1[3];         //Z軸との型が違うのでキャストしとけ
@@ -37,9 +41,9 @@ typedef struct {
 } ENU;
 
 typedef struct {
-  ENU enu1;
-  ENU enu2;
-} ENUs;
+  float angle;
+  float distance;
+} PolarCoordinates;
 
 class Run{
   public :
@@ -48,10 +52,11 @@ class Run{
     void rollInit(void);
     
   public :
-    float get_distance(void);
-    float get_angle(void);
+    void get_distance(void);
+    void get_angle(void);
+    float get_angle(float vec1X, float vec1Y, float vec2X, float vec2Y);
+    int crossProduct(float vec1X, float vec1Y, float vec2X, float vec2Y);
     float get_gyro(void);
-    void get_line(void);
     unsigned long int rollInstrumentL(void);
     unsigned long int rollInstrumentR(void);
     static void get_rollInstrumentL(void);
@@ -67,17 +72,22 @@ class Run{
   public :
     float batt_voltage(void);
     double getDt(void);
-  /*
+  
   public :
     ECEF GEDE2ECEF(GEDE cod_f, GEDE cod);
     ENU ECEF2ENU(ECEF vector, GEDE cod);
     ENU GEDE2ENU(GEDE cod_f, GEDE cod);
+    PolarCoordinates ENU2PolarCoordinates(ENU enu1, ENU enu2);
+    
+  public :
+    double kalmanFilter_DistanceX(double accel, double distance, double dt);
+    double kalmanFilter_DistanceY(double accel, double distance, double dt);
     
   public :
     int turnDecision(void);
     float crossProduct(void);
     float checkAngle(ENU enu1, ENU enu2);
-    */
+   
   private :
     int motorPinLF;
     int motorPinLB;
@@ -86,9 +96,10 @@ class Run{
     float line_angle;
    
   private :
-    float origin[2];
-    float curent[2];
-    
+    GEDE ORIGIN;
+    GEDE GOAL;
+    PolarCoordinates rover;
+    PolarCoordinates goal;
 };
 
 extern Run run;

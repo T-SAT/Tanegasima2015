@@ -44,22 +44,62 @@ void Run::rollInit(void)
   attachInterrupt(1, get_rollInstrumentR, FALLING);
 }
 
-float Run::get_distance(void)
+void Run::get_distance(void)
 {
   
 }
 
-float Run::get_angle(void)
+void Run::get_angle(void)
 {
   
 }
 
+float Run::get_angle(float vec1X, float vec1Y, float vec2X, float vec2Y)
+{
+  float sin_v, cos_v;
+  float seata;
+  
+  sin_v = (vec1X*vec2Y - vec2X*vec1Y)/(sqrt(vec1X*vec1X + vec1Y*vec1Y) * sqrt(vec2X*vec2X + vec2Y*vec2Y));
+  cos_v = (vec1X*vec2X + vec1Y*vec2Y)/(sqrt(vec1X*vec1X + vec1Y*vec1Y) * sqrt(vec2X*vec2X + vec2Y*vec2Y));
+ 
+  if(0<sin_v && 0<cos_v){
+    seata = crossProduct(vec1X, vec1Y, vec2X, vec2Y)*max(asin(sin_v), -asin(sin_v));
+    return(seata);
+  }
+
+  else if(0<sin_v && cos_v<0){
+    seata = crossProduct(vec1X, vec1Y, vec2X, vec2Y)*max(acos(cos_v), -acos(cos_v));
+    return(seata);
+  }
+
+  else if(sin_v<0 && cos_v<0){
+    seata = acos(cos_v);
+    seata = seata + PI/2;
+    seata = 2*PI - seata;
+    seata = crossProduct(vec1X, vec1Y, vec2X, vec2Y)*max(seata, -seata);
+    return(seata);
+  }
+
+  else if(sin_v<0 && 0<cos_v){
+    seata = asin(sin_v);
+    seata = crossProduct(vec1X, vec1Y, vec2X, vec2Y)*max(seata, -seata);
+    return(seata);
+  }
+  
+  else return(0);
+}
+
+int Run::crossProduct(float vec1X, float vec1Y, float vec2X, float vec2Y)
+{
+  float tmp;
+  
+  tmp = vec1X*vec2Y - vec2X*vec1Y;
+  if(tmp < 0) return(1);
+  else if(0 < tmp) return(-1);
+  else return(0);
+}
+  
 float Run::get_gyro(void)
-{
-  
-}
-
-void Run::get_line(void)
 {
   
 }
@@ -76,12 +116,10 @@ unsigned long int Run::rollInstrumentR(void)
 
 void Run::get_rollInstrumentL(void)
 {
-  unsigned long int time_ori, time_last;
+  unsigned long int time;
   
-  time_ori = micros();
-  do {
-    time_last = micros();
-  }while(time_last-time_ori < 500);
+  time = micros();;
+  while(micros()-time < 500);
   
   time02 = millis();
   time00 = time02 - time01;
@@ -90,12 +128,10 @@ void Run::get_rollInstrumentL(void)
 
 void Run::get_rollInstrumentR(void)
 {
-  unsigned long int time_ori, time_last;
+  unsigned long int time;
   
-  time_ori = micros();
-  do {
-    time_last = micros();
-  }while(time_last-time_ori < 500);
+  time = micros();
+  while(micros()-time < 500);
   
   time12 = millis();
   time10 = time12 - time11;
@@ -155,7 +191,7 @@ void Run::turn(float target_value)
     last_value=current_value; //一つ前の出力値を更新
     i_error+=error; //偏差の総和を更新
   } while(0 < error);
-  
+
 }
 
 void Run::steer(void)
@@ -215,7 +251,7 @@ float Run::batt_voltage(void)
 
 double Run::getDt(void)
 {
-  static long lastTime=0;
+  static unsigned long int lastTime=0.0;
   
   long nowTime = micros();
   double time = (double)(nowTime - lastTime);
@@ -226,8 +262,7 @@ double Run::getDt(void)
   return( time );
 }
 
-/*
-ECEF Run::GEDE2ECEF(GEDE cod, GEDE cod)
+ECEF Run::GEDE2ECEF(GEDE cod_f, GEDE cod)
 {
   ECEF tmp;
   
@@ -284,4 +319,65 @@ ENU Run::GEDE2ENU(GEDE cod_f, GEDE cod)
    
   return(tmp_enu);
 }
-*/
+
+double Run::kalmanFilter_DistanceX(double accel, double distance, double dt)
+{
+  static double x[2] = {0.0, 0.0};
+  static double P[2][2] = { {0, 0}, {0, 0}};
+  static double K[2];
+  const  double Q[2][2] = { {0.01, 0}, {0, 0.003}}; 
+  const  double R = 1.0;
+    
+  x[1] = x[1] + 9.8*accel*dt;
+  x[0] = x[0] + x[1]*dt;
+  
+  P[0][0] += dt*(P[1][0] + dt*(P[0][1] + dt*P[1][1]) + Q[0][0]);
+  P[0][1] += dt*P[1][1];
+  P[1][0] += dt*P[1][1];
+  P[1][1] += dt*Q[1][1];
+  
+  K[0] = P[0][0] / (P[0][0] + R);
+  K[1] = P[1][0] / (P[0][0] + R);
+  
+  x[0] += K[0]*(distance - x[0]);
+  x[1] += K[1]*(distance - x[0]);
+    
+  P[0][0] -= P[0][0]*K[0];
+  P[0][1] -= P[0][1]*K[0];
+  P[1][0] -= K[1]*P[0][0];
+  P[1][1] -= K[1]*P[0][1];
+  
+  return(x[0]);
+}
+
+double Run::kalmanFilter_DistanceY(double accel, double distance, double dt)
+{
+  static double x[2] = {0.0, 0.0};
+  static double P[2][2] = { {0, 0}, {0, 0}};
+  static double K[2];
+  const  double Q[2][2] = { {0.01, 0}, {0, 0.003}}; 
+  const  double R = 1.0;
+    
+  x[1] = x[1] + 9.8*accel*dt;
+  x[0] = x[0] + x[1]*dt;
+  
+  P[0][0] += dt*(P[1][0] + dt*(P[0][1] + dt*P[1][1]) + Q[0][0]);
+  P[0][1] += dt*P[1][1];
+  P[1][0] += dt*P[1][1];
+  P[1][1] += dt*Q[1][1];
+  
+  K[0] = P[0][0] / (P[0][0] + R);
+  K[1] = P[1][0] / (P[0][0] + R);
+  
+  x[0] += K[0]*(distance - x[0]);
+  x[1] += K[1]*(distance - x[0]);
+    
+  P[0][0] -= P[0][0]*K[0];
+  P[0][1] -= P[0][1]*K[0];
+  P[1][0] -= K[1]*P[0][0];
+  P[1][1] -= K[1]*P[0][1];
+  
+  return(x[0]);
+}
+
+

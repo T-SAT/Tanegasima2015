@@ -24,16 +24,30 @@ void SerialSlave::receive_data(ring_buffer *buf)
       break;
   
     case ACCEL_NUM:
+       IMU.receiveAcc();
+      _data.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
+      _data.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');
+      _data.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');
       Wire.onRequest(send_Accel);
       Serial.print(START);
       break;
     
     case GYRO_NUM:
+      IMU.receiveGyro();
+      _data.Data.gyro.float_data.xG = IMU.get(GYR,'x') - IMU.getZero(GYR,'x');
+      _data.Data.gyro.float_data.yG = IMU.get(GYR,'y') - IMU.getZero(GYR,'y');
+      _data.Data.gyro.float_data.zG = IMU.get(GYR,'z') - IMU.getZero(GYR,'z');
       Wire.onRequest(send_Gyro);
       Serial.print(START);
       break;
     
     case ALL_NUM:
+      _data.Data.gyro.float_data.xG = IMU.get(GYR,'x') - IMU.getZero(GYR,'x');
+      _data.Data.gyro.float_data.yG = IMU.get(GYR,'y') - IMU.getZero(GYR,'y');
+      _data.Data.gyro.float_data.zG = IMU.get(GYR,'z') - IMU.getZero(GYR,'z');
+      _data.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
+      _data.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');
+      _data.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');
       Wire.onRequest(send_All);
       Serial.print(START);
       break;
@@ -49,28 +63,27 @@ void SerialSlave::send_GPS(void)
 {
   Wire.write(_data.Data.gps.byte_data, sizeof(_data.Data.gps.byte_data));
   Wire.begin();
-  noInterrupts();
 }
 
 void SerialSlave::send_Accel(void)
 { 
   Wire.write(_data.Data.accel.byte_data, sizeof(_data.Data.accel.byte_data));
+  Serial.print(ENABLE);  
   Wire.begin();
-  noInterrupts();
 }
 
 void SerialSlave::send_Gyro(void)
 {
   Wire.write(_data.Data.gyro.byte_data, sizeof(_data.Data.gyro.byte_data));
+  Serial.print(ENABLE);
   Wire.begin();
-  noInterrupts();
 }
 
 void SerialSlave::send_All(void)
 {
   Wire.write(_data.byte_data, sizeof(_data.byte_data));
+  Serial.print(ENABLE);
   Wire.begin();
-  noInterrupts();
 }
 
 void SerialSlave::setData_GPS(float flat, float flon)

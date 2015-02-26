@@ -20,6 +20,7 @@
 
 #define START                      '0'
 #define RECEIVE                    '1'
+#define ENABLE                     '2'
 
 #define PARA_PIN                    6
 

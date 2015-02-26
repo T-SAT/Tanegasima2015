@@ -21,6 +21,7 @@
 
 #define START                '0'
 #define RECEIVE              '1'
+#define ENABLE               '2'
 
 typedef struct {
   float flat;

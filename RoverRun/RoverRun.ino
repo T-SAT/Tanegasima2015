@@ -15,9 +15,9 @@ void setup()
 
 void loop()
 {
-  float accXval;
+  float flat;
   
-  Master.request_data(ALL_NUM);
-  accXval = Master.get(ACCEL_NUM, 'x');
-  Serial.println(accXval);
+  Master.request_data(ACCEL_NUM);
+  flat = Master.get(ACCEL_NUM, 'x');
+  Serial.println(flat);
 }

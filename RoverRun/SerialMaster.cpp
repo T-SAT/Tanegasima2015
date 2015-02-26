@@ -18,67 +18,99 @@ void SerialMaster::request_data(char select_num)
   unsigned long int time;
   
   time = millis();
+  while(Serial.read() != ENABLE){
+    if(1000 < millis() - time)
+      break;
+  }
+  
+  time = millis();
   while(check != RECEIVE){
     Serial.print(select_num);
-    delay(65);
+    delay(60);
     check = Serial.read();
-    if(30000 < millis() - time)
+    if(1000 < millis() - time)
       break; 
   }
   
   time = millis();
   while(check != START){
     check = Serial.read();
-    if(30000 < millis() - time)
+    if(2500 < millis() - time)
       break;
   }
   
   switch(select_num){
   case ACCEL_NUM:
+    time = millis();
     while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
-      delay(75);
+      delay(60);
+      if(1500 < millis() - time)
+        break;
     }
   
+    time = millis();
     while(Wire.available()){
       _data.Data.accel.byte_data[i] = Wire.read();
       i++;
+      if(5000 < millis() - time)
+        break;
     }
+      
     break;
     
   case GYRO_NUM:
+    time = millis();
     while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
       delay(70);
+      if(5000 < millis() - time)
+        break;
     }
   
+    time = millis();
     while(Wire.available()){
       _data.Data.gyro.byte_data[i] = Wire.read();
       i++;
+      if(5000 < millis() - time)
+        break;
     }
+    
     break;
  
   case GPS_NUM:
+    time = millis();
     while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*2);
       delay(70);
+      if(5000 < millis() - time)
+        break;
     }
   
+    time = millis();
     while(Wire.available()){
       _data.Data.gps.byte_data[i] = Wire.read();
       i++;
+      if(5000 < millis() - time)
+        break;
     }
     break;
     
     case ALL_NUM:
+      time = millis();
       while(!Wire.available()){
         Wire.requestFrom(SLAVE_DEVICE_NUM, (sizeof(float)*11 + sizeof(unsigned long int)));
         delay(75);
+        if(5000 < millis() - time)
+          break;
       }
       
+      time = millis();
       while(Wire.available()){
         _data.byte_data[i] = Wire.read();
         i++;
+        if(5000 < millis() - time)
+          break;
       }
       break;
       
