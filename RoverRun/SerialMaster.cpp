@@ -22,7 +22,7 @@ void SerialMaster::request_data(char select_num)
 {
   int i=0;
   byte check = '0';
-  unsigned long int time;
+  unsigned long int time, time1;
 
   time = millis();
   while(Serial.read() != ENABLE){
@@ -30,13 +30,26 @@ void SerialMaster::request_data(char select_num)
       break;
   }
 
-  time = millis();
-  while(check != RECEIVE){
-    Serial.print(select_num);
-    delay(70);
-    check = Serial.read();
-    if(1000 < millis() - time)
-      break; 
+  if(select_num == GPS_NUM || select_num == ALL_NUM){
+    time = millis();
+    while(check != RECEIVE){
+      Serial.print(select_num);
+      for(time1 = millis(); millis() - time1 < 1500;)
+        check = Serial.read();
+      if(1000 < millis() - time)
+        break; 
+    }
+  }
+
+  else {
+    time = millis();
+    while(check != RECEIVE){
+      Serial.print(select_num);
+      delay(70);
+      check = Serial.read();
+      if(1000 < millis() - time)
+        break; 
+    }
   }
 
   time = millis();
@@ -284,4 +297,5 @@ int SerialMaster::saveLog(float data){
 
   return(0);
 }
+
 

@@ -33,19 +33,22 @@
 typedef struct {
   float flat;
   float flon;
-} GPS;
+} 
+GPS;
 
 typedef struct {
   float xA;
   float yA;
   float zA;
-} Accel;
+} 
+Accel;
 
 typedef struct {
   float xG;
   float yG;
   float zG;
-} Gyro;
+} 
+Gyro;
 
 typedef union {
   uint8_t byte_data[32];
@@ -53,37 +56,46 @@ typedef union {
     union {
       GPS gps_data;
       uint8_t byte_data[8];
-    } gps;
- 
+    } 
+    gps;
+
     union {
       Accel float_data;
       uint8_t byte_data[12];
-    } accel;
-  
+    } 
+    accel;
+
     union {
       Gyro float_data;
       uint8_t byte_data[12];
-    } gyro;
-  } Data;
-} sensorData;
+    } 
+    gyro;
+  } 
+  Data;
+} 
+sensorData;
 
 class SerialSlave{
-  public:
-        static void select_func(byte select_num);
-	static void change_job(ring_buffer *buf);
-        static void receive_data(ring_buffer *buf);
-      	static void send_GPS(void);
-        static void send_Accel(void);
-	static void send_Gyro(void);
-        static void send_All(void);
-        static void setData_GPS(float flat, float flon);
-        static void setData_Accel(float x, float y, float z);
-        static void setData_Gyro(float x, float y, float z);
-	int saveSD(sensorData data, unsigned long int time);
+public:
+  static void select_func(byte select_num);
+  static void change_job(ring_buffer *buf);
+  static void receive_data(ring_buffer *buf);
+  static void send_GPS(void);
+  static void send_Accel(void);
+  static void send_Gyro(void);
+  static void send_All(void);
+  static void setData_GPS(float flat, float flon);
+  static void setData_Accel(float x, float y, float z);
+  static void setData_Gyro(float x, float y, float z);
+  int saveSD(sensorData data, unsigned long int time);
+
+public :
+  static float recvGPS(char *str);
 };
 
 extern SerialSlave Slave;
 
 #endif
+
 
 
