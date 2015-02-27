@@ -6,8 +6,7 @@ SerialMaster Master;
 
 SerialMaster::SerialMaster(void)
 {
-  pinMode(10, OUTPUT);
-  pinMode(SD_PIN, OUTPUT);
+
 }
 
 void SerialMaster::write_numbers(int numbers, int dev_number)
@@ -204,13 +203,8 @@ float SerialMaster::get(char sensor, char axis)
 
 }
 
-int SerialMaster::saveData(sensorData data, unsigned long int time){
-  File saveFile;
+int SerialMaster::saveData(File saveFile, sensorData data, unsigned long int time){
   static int initFlag=0;
-
-  if(!SD.begin(4)) {
-    return(-1);
-  }
 
   saveFile = SD.open("data_log.txt", FILE_WRITE);
 
@@ -252,19 +246,14 @@ int SerialMaster::saveData(sensorData data, unsigned long int time){
   return(0);
 }
 
-int SerialMaster::saveLog(char *str, float data, unsigned long int time){
-  File saveFile;
-
-  if(!SD.begin(SD_PIN)) {
-    return(-1);
-  }
-
+int SerialMaster::saveLog(File saveFile, char *str, float data, unsigned long int time){
+  
   saveFile = SD.open("control_log.txt", FILE_WRITE);
 
   if(saveFile){
     saveFile.print(str);
     saveFile.print(data);
-    saveFile.print(time);
+    saveFile.println(time);
     saveFile.close();
   }
 
@@ -276,17 +265,12 @@ int SerialMaster::saveLog(char *str, float data, unsigned long int time){
 }
 
 
-int SerialMaster::saveLog(float data){
-  File saveFile;
-
-  if(!SD.begin(SD_PIN)) {
-    return(-1);
-  }
+int SerialMaster::saveLog(File saveFile, char *str){
 
   saveFile = SD.open("control_log.txt", FILE_WRITE);
 
   if(saveFile){
-    saveFile.print(data);
+    saveFile.println(str);
     saveFile.close();
   }
 

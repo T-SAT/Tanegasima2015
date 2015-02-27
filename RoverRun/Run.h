@@ -7,12 +7,18 @@
 #include "WProgram.h"
 #endif
 
+
 #define ROVER_R     0.09 //[m]
 #define WHEEL_R     0.07 //[m]
 
-#define REDLINE_R 6378137
-#define E_2 0.00335281*2 - 0.00335281*0.00335281
-#define N(a) 6378137 / sqrt( 1.0 - (0.00335281*2 - 0.00335281*0.00335281)*sin(a)*sin(a) )
+#define PI 3.1415926535898
+#define A 6378137.0 /* Semi-major axis */
+#define ONE_F 298.257223563 /* 1/F */
+#define B (A*(1.0 - 1.0/ONE_F))
+#define E2 ((1.0/ONE_F)*(2-(1.0/ONE_F)))
+#define ED2 (E2*A*A/(B*B))
+#define NN(p) (A/sqrt(1.0 - (E2)*pow(sin(p*PI/180.0), 2)))
+#define NUM  3
 
 typedef struct {
   double matrix3TO3[3][3];
@@ -22,16 +28,12 @@ typedef struct {
 typedef struct {
   float LAT;
   float LON;
-  long unsigned int AGE;
 } GEDE;
 
 typedef struct {
   double X;
   double Y;
-  unsigned long Z;
-  double X_F;
-  double Y_F;
-  long unsigned int Z_F;
+  double Z;
 } ECEF;
 
 typedef struct {
@@ -74,20 +76,23 @@ class Run{
     double getDt(void);
   
   public :
-    ECEF GEDE2ECEF(GEDE cod_f, GEDE cod);
-    ENU ECEF2ENU(ECEF vector, GEDE cod);
-    ENU GEDE2ENU(GEDE cod_f, GEDE cod);
+    ECEF GEDE2ECEF(GEDE cod, double height);
+    GEDE ECEF2GEDE(ECEF ec);
+    ENU ECEF2ENU(ECEF origin, ECEF dest);
+    ENU GEDE2ENU(GEDE origin, GEDE dest);
     PolarCoordinates ENU2PolarCoordinates(ENU enu1, ENU enu2);
     
   public :
     double kalmanFilter_DistanceX(double accel, double distance, double dt);
     double kalmanFilter_DistanceY(double accel, double distance, double dt);
     
-  public :
-    int turnDecision(void);
-    float crossProduct(void);
-    float checkAngle(ENU enu1, ENU enu2);
-   
+  public:
+    void rotx(double rota[3][3], double sita);  //deg
+    void roty(double rota[3][3], double sita);  //deg
+    void rotz(double rota[3][3], double sita);  //deg
+    void matmat(double tmp[3][3], double mat1[3][3], double mat2[3][3]);
+    ENU matvec(double mat[3][3], ECEF vector);
+    
   private :
     int motorPinLF;
     int motorPinLB;
