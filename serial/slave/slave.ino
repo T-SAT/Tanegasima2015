@@ -6,26 +6,11 @@
 #include <LPS331.h>
 #include "SensorStick_9DoF.h"
 #include "SerialSlave.h"
-#include "KalmanFilter.h"
-#include <MsTimer2.h>
 
 LPS331 ps;
+/*
 SoftwareSerial ss(12, 11);
 TinyGPS gpsSerial;
-
-KalmanFilter Kalman9DOFX;
-KalmanFilter Kalman9DOFY;
-
-/*
-KalmanFilter KalmanAltitude;
-KalmanFilter KalmanAccelX;
-KalmanFilter KalmanAccelY;
-KalmanFilter KalmanAccelZ;
-KalmanFilter KalmanGyroX;
-KalmanFilter KalmanGyroY;
-KalmanFilter KalmanGyroZ;
-KalmanFilter KalmanGPSFlat;
-KalmanFilter KalmanGPSFlon;
 */
 
 void setup() {
@@ -33,7 +18,7 @@ void setup() {
   float flat,flon;
   
   Serial.begin(9600); 
-  ss.begin(9600);
+
   sensorInit();
   pinMode(10,OUTPUT);
   
@@ -48,7 +33,7 @@ void loop() {
   unsigned long int time;
   int check_sd;
 
-  delay(100);
+  delay(200);
 }
 
 void sensorInit()
@@ -66,6 +51,7 @@ void cut_parachute(void)
   digitalWrite(PARA_PIN, LOW);
 }
 
+/*
 float recvGPS(char select)
 {
   bool newData = false;
@@ -96,4 +82,4 @@ float recvGPS(char select)
   }
 }  
 
-
+*/

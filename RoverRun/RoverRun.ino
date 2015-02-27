@@ -18,8 +18,7 @@ void loop()
   float flat;
   float flon;
   
-  Master.request_data(ALL_NUM);
-  flat = Master.get(ACCEL_NUM, 'x');
-  
+  Master.request_data(GPS_NUM);
+  flat = Master.get(GPS_NUM, 'x');
   Serial.println(flat);
 }

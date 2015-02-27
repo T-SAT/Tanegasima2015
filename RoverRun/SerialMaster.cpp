@@ -22,20 +22,21 @@ void SerialMaster::request_data(char select_num)
 {
   int i=0;
   byte check = '0';
-  unsigned long int time;
+  unsigned long int time, time1;
 
   time = millis();
   while(Serial.read() != ENABLE){
-    if(1000 < millis() - time)
+    if(5000 < millis() - time)
       break;
   }
 
   time = millis();
   while(check != RECEIVE){
     Serial.print(select_num);
-    delay(70);
-    check = Serial.read();
-    if(1000 < millis() - time)
+    
+    for(time1 = millis(); millis() - time1 < 1500;)
+      check = Serial.read();
+    if(6000 < millis() - time)
       break; 
   }
 
@@ -51,7 +52,7 @@ void SerialMaster::request_data(char select_num)
     time = millis();
     while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
-      delay(70);
+      delay(1500);
       if(1500 < millis() - time)
         break;
     }
@@ -70,7 +71,7 @@ void SerialMaster::request_data(char select_num)
     time = millis();
     while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*3);
-      delay(70);
+      delay(1500);
       if(5000 < millis() - time)
         break;
     }
@@ -89,7 +90,7 @@ void SerialMaster::request_data(char select_num)
     time = millis();
     while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*2);
-      delay(70);
+      delay(1500);
       if(5000 < millis() - time)
         break;
     }
@@ -107,7 +108,7 @@ void SerialMaster::request_data(char select_num)
     time = millis();
     while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*8);
-      delay(85);
+      delay(1500);
       if(5000 < millis() - time)
         break;
     }
