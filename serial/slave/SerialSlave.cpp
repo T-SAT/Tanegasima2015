@@ -15,7 +15,6 @@ void SerialSlave::receive_data(ring_buffer *buf)
   interrupts();
   Serial.print(RECEIVE);
   Wire.begin(SLAVE_DEVICE_NUM);
-  
   if(check == GPS_NUM || check == ACCEL_NUM || check == GYRO_NUM || check == ALL_NUM){
     switch(check){
     case GPS_NUM:
@@ -42,6 +41,8 @@ void SerialSlave::receive_data(ring_buffer *buf)
       break;
     
     case ALL_NUM:
+      IMU.receiveGyro();
+      IMU.receiveAcc();
       _data.Data.gyro.float_data.xG = IMU.get(GYR,'x') - IMU.getZero(GYR,'x');
       _data.Data.gyro.float_data.yG = IMU.get(GYR,'y') - IMU.getZero(GYR,'y');
       _data.Data.gyro.float_data.zG = IMU.get(GYR,'z') - IMU.getZero(GYR,'z');
@@ -106,51 +107,4 @@ void SerialSlave::setData_Gyro(float x, float y, float z)
   _data.Data.gyro.float_data.zG = z;
 }
 
-int SerialSlave::saveSD(sensorData data, unsigned long int time){
-  File saveFile;
-  static int initFlag=0;
-  
-  if(!SD.begin(4)) {
-    return(-1);
-  }
-  
-  saveFile = SD.open("data_log.txt", FILE_WRITE);
-  
-  if(saveFile) {
-    if(initFlag == 0) {
-      saveFile.println("xA,yA,zA,xG,yG,zG,LAT,LON,AGE,time");
-      saveFile.close();
-      initFlag = 1;
-    }
-    
-    else {
-      saveFile.print(data.Data.accel.float_data.xA);
-      saveFile.print(",");
-      saveFile.print(data.Data.accel.float_data.yA);
-      saveFile.print(",");
-      saveFile.print(data.Data.accel.float_data.zA);
-      saveFile.print(",");
-      saveFile.print(data.Data.gyro.float_data.xG);
-      saveFile.print(",");
-      saveFile.print(data.Data.gyro.float_data.yG);
-      saveFile.print(",");
-      saveFile.print(data.Data.gyro.float_data.zG);
-      saveFile.print(",");
-      saveFile.print(data.Data.gps.gps_data.flat);
-      saveFile.print(",");
-      saveFile.print(data.Data.gps.gps_data.flon);
-      saveFile.print(",");
-      saveFile.print(data.Data.gps.gps_data.flat);
-      saveFile.print(",");
-      saveFile.println(time);
-      saveFile.close();
-    }
-  }
-  
-  else {
-    return(-1);
-  }
-  
-  return(0);
-}
 

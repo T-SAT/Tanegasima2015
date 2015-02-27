@@ -37,26 +37,7 @@ void setup() {
   sensorInit();
   pinMode(10,OUTPUT);
   
-  /*
-  pressure = ps.readPressureMillibars();
-  tempreture = ps.readTemperatureC();
-  ps.set_initValue(pressure, tempreture);
-  
-  KalmanAltitude.setState(0.0);
-  */
-  
-  /*
-  flat = recvGPS('x');
-  flon = recvGPS('y');
-  KalmanAccelX.setState(0.0);
-  KalmanAccelY.setState(0.0);
-  KalmanAccelZ.setState(1.0);
-  KalmanGyroX.setState(0.0);
-  KalmanGyroY.setState(0.0);
-  KalmanGyroZ.setState(0.0);
-  KalmanGPSFlat.setState(flat);
-  KalmanGPSFlon.setState(flon);
-  */
+
   Serial.print(ENABLE);
   Serial.setintr(Slave.receive_data);
 }
@@ -66,52 +47,7 @@ void loop() {
   sensorData tmp;
   unsigned long int time;
   int check_sd;
-  
-  /*
-  IMU.receiveAcc();
-  IMU.receiveGyro();
-  time = millis();
-  tmp.Data.gyro.float_data.xG = IMU.get(GYR,'x') - IMU.getZero(GYR,'x');  //オフセットぶんを差し引く
-  tmp.Data.gyro.float_data.yG = IMU.get(GYR,'y') - IMU.getZero(GYR,'y');
-  tmp.Data.gyro.float_data.zG = IMU.get(GYR,'z') - IMU.getZero(GYR,'z');
-  tmp.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
-  tmp.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');  //オフセットぶんを差し引く
-  tmp.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');  //オフセットぶんを差し引く
-  tmp.Data.gps.gps_data.flat = recvGPS('x');
-  tmp.Data.gps.gps_data.flon = recvGPS('y');
- 
- /*
-  KalmanAccelX.correct(tmp.Data.accel.float_data.xA);
-  KalmanAccelY.correct(tmp.Data.accel.float_data.yA);
-  KalmanAccelZ.correct(tmp.Data.accel.float_data.zA);
-  KalmanGyroX.correct(tmp.Data.gyro.float_data.xG);
-  KalmanGyroY.correct(tmp.Data.gyro.float_data.yG);
-  KalmanGyroZ.correct(tmp.Data.gyro.float_data.zG);
-  KalmanGPSFlat.correct(tmp.Data.gps.gps_data.flat);
-  KalmanGPSFlon.correct(tmp.Data.gps.gps_data.flat);
-  tmp.Data.accel.float_data.xA = KalmanAccelX.getState();
-  tmp.Data.accel.float_data.yA = KalmanAccelY.getState();
-  tmp.Data.accel.float_data.zA = KalmanAccelZ.getState();
-  tmp.Data.gyro.float_data.xG  = KalmanGyroX.getState();
-  tmp.Data.gyro.float_data.yG  = KalmanGyroY.getState();
-  tmp.Data.gyro.float_data.zG  = KalmanGyroZ.getState();
-  tmp.Data.gps.gps_data.flat   = KalmanGPSFlat.getState();
-  tmp.Data.gps.gps_data.flon   = KalmanGPSFlon.getState();
-  */
-  /*
-  Slave.setData_Accel(tmp.Data.accel.float_data.xA, tmp.Data.accel.float_data.yA, tmp.Data.accel.float_data.zA);
-  Slave.setData_Gyro(tmp.Data.gyro.float_data.xG, tmp.Data.gyro.float_data.yG, tmp.Data.gyro.float_data.zG);
-  Slave.setData_GPS(tmp.Data.gps.gps_data.flat, tmp.Data.gps.gps_data.flon);
-  */
-  
-  /*
-  do {
-    check_sd = Slave.saveSD(tmp, time);
-  }while(check_sd == -1);
-  */
-  
-  //Serial.print(ENABLE);
-  
+
   delay(100);
 }
 
