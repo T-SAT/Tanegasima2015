@@ -26,7 +26,7 @@ void loop()
   ENU enu;
   ECEF ecef, ecef_o;
   double high1, high2;
- /*
+ 
   tmp1.LAT = 38.14227288;
   tmp1.LON = 140.93265738;
   high1 = 45.664;
@@ -43,8 +43,7 @@ void loop()
   Serial.print(enu.N);  Serial.print('\t'); 
   Serial.println(enu.U);  
   delay(1000);
-  */
-  Master.saveLog(saveFile, "test :", 0.721, millis());
+  
 }
 
 

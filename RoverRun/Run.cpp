@@ -303,26 +303,16 @@ ENU Run::ECEF2ENU(ECEF origin, ECEF dest)
   ECEF mov;
   ENU ret;
   double rotyp[3][3], rotzp1[3][3], rotzp2[3][3];
-  double mat_conv1[3][3];
-  double mat_conv2[3][3];
-  
-  for(int i=0; i<3; i++){
-    for(int j=0; j<3; j++)
-      mat_conv1[i][j] = mat_conv2[0][0] = 0.0;
-  }
+  double mat_conv1[3][3] = {
+  };
+  double mat_conv2[3][3] = {
+  };
+
   blh = ECEF2GEDE(origin);
   rotz(rotzp1,90.0);
   roty(rotyp, 90.0 - blh.LAT);
   rotz(rotzp2,blh.LON);
   matmat(mat_conv1, rotzp1, rotyp);
-  for(int i=0; i<3; i++){
-    for(int j=0; j<3; j++){
-      Serial.print(mat_conv1[i][j]);
-      Serial.print('\t');
-    }
-    Serial.println();
-  }
-  delay(2000);
   matmat(mat_conv2, mat_conv1, rotzp2);
   mov.X = dest.X - origin.X;
   mov.Y = dest.Y - origin.Y;
@@ -332,13 +322,14 @@ ENU Run::ECEF2ENU(ECEF origin, ECEF dest)
   return ret;
 }
 
-ENU Run::GEDE2ENU(GEDE cod_f, GEDE cod)
+ENU Run::GEDE2ENU(GEDE origin, GEDE dest, double high)
 {
-  ECEF tmp_ecef;
+  ECEF ecef, ecef_o;
   ENU tmp_enu;
 
-  //tmp_ecef = GEDE2ECEF(cod_f, cod);
-  //tmp_enu = ECEF2ENU(tmp_ecef, cod);
+  ecef_o = GEDE2ECEF(origin, high);
+  ecef = GEDE2ECEF(dest, high);
+  tmp_enu = ECEF2ENU(ecef_o, ecef);
 
   return(tmp_enu);
 }
@@ -346,19 +337,19 @@ ENU Run::GEDE2ENU(GEDE cod_f, GEDE cod)
 double Run::kalmanFilter_DistanceX(double accel, double distance, double dt)
 {
   static double x[2] = {
-    0.0, 0.0                };
+    0.0, 0.0                  };
   static double P[2][2] = { 
     {
-      0, 0                                }
+      0, 0                                    }
     , {
-      0, 0                                }
+      0, 0                                    }
   };
   static double K[2];
   const  double Q[2][2] = { 
     {
-      0.01, 0                                }
+      0.01, 0                                    }
     , {
-      0, 0.003                                }
+      0, 0.003                                    }
   }; 
   const  double R = 1.0;
 
@@ -388,19 +379,19 @@ double Run::kalmanFilter_DistanceX(double accel, double distance, double dt)
 double Run::kalmanFilter_DistanceY(double accel, double distance, double dt)
 {
   static double x[2] = {
-    0.0, 0.0                };
+    0.0, 0.0                  };
   static double P[2][2] = { 
     {
-      0, 0                                }
+      0, 0                                    }
     , {
-      0, 0                                }
+      0, 0                                    }
   };
   static double K[2];
   const  double Q[2][2] = { 
     {
-      0.01, 0                                }
+      0.01, 0                                    }
     , {
-      0, 0.003                                }
+      0, 0.003                                    }
   }; 
   const  double R = 1.0;
 
@@ -470,15 +461,22 @@ void Run::rotz(double rota[3][3], double sita)
 void Run::matmat(double c[NUM][NUM],double a[NUM][NUM],double b[NUM][NUM])
 {
   int i,j,k;
+  double r,s,t;
 
+  r = 0;
   //受け取った２つの行列の掛け算を行う。
   for(i=0;i<NUM;i++) {
     for(j=0;j<NUM;j++) {
       for(k=0;k<NUM;k++) {
-        c[i][j]+=a[i][k]*b[k][j];
+        t = c[i][j] + (a[i][k]*b[k][j] + r);
+        r = (a[i][k]*b[k][j] + r) - (t - c[i][j]);
+        c[i][j] = t;
       }
+      r = 0;
     }
+    r = 0;
   }
+  
 }
 
 
@@ -493,6 +491,7 @@ ENU Run::matvec(double mat[3][3], ECEF vector)
 
   return(tmp);
 }
+
 
 
 

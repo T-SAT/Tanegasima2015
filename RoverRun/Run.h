@@ -79,7 +79,7 @@ class Run{
     ECEF GEDE2ECEF(GEDE cod, double height);
     GEDE ECEF2GEDE(ECEF ec);
     ENU ECEF2ENU(ECEF origin, ECEF dest);
-    ENU GEDE2ENU(GEDE origin, GEDE dest);
+    ENU GEDE2ENU(GEDE origin, GEDE dest, double high);
     PolarCoordinates ENU2PolarCoordinates(ENU enu1, ENU enu2);
     
   public :
