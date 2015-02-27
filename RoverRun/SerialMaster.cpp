@@ -30,14 +30,26 @@ void SerialMaster::request_data(char select_num)
       break;
   }
 
-  time = millis();
-  while(check != RECEIVE){
-    Serial.print(select_num);
-    
-    for(time1 = millis(); millis() - time1 < 1500;)
+  if(select_num == GPS_NUM || select_num == ALL_NUM){
+    time = millis();
+    while(check != RECEIVE){
+      Serial.print(select_num);
+      for(time1 = millis(); millis() - time1 < 1500;)
+        check = Serial.read();
+      if(1000 < millis() - time)
+        break; 
+    }
+  }
+
+  else {
+    time = millis();
+    while(check != RECEIVE){
+      Serial.print(select_num);
+      delay(70);
       check = Serial.read();
-    if(6000 < millis() - time)
-      break; 
+      if(1000 < millis() - time)
+        break; 
+    }
   }
 
   time = millis();
@@ -83,7 +95,6 @@ void SerialMaster::request_data(char select_num)
       if(5000 < millis() - time)
         break;
     }
-
     break;
 
   case GPS_NUM:
@@ -285,4 +296,5 @@ int SerialMaster::saveLog(float data){
 
   return(0);
 }
+
 

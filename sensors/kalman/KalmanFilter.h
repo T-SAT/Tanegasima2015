@@ -9,10 +9,6 @@
 
 #define CLAMP(x, low, high) (x > high)? high : (x < low)? low : x
 
-#define Z_VARIANCE          500.0f 
-#define ZACCEL_VARIANCE	    1.0f 
-#define ZACCELBIAS_VARIANCE 1.0f 
-
 #define LPS331_ERRORVALUE  1.6
 #define CUT_ALTITUDE       6.0
 
@@ -21,7 +17,7 @@ class KalmanFilter{
     double getDt(void);
     double kalmanFilter_9DOF(double u, double y, double dt);
     double kalmanFilter_Barometer(double accel, double altitude, double dt);
-    double Recursive_LeastSquaresMethod(double value, double dt);
+    double kalmanFilter_Distance(double accel, double distance, double dt);
     
   public:
     double getState() const;

@@ -21,7 +21,7 @@ void SerialMaster::request_data(char select_num)
     delay(60);
     check = Serial.read();
   }
-  
+  Serial.println("check");
   while(check != START)
     check = Serial.read();
   

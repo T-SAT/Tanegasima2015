@@ -7,8 +7,8 @@
 #include "WProgram.h"
 #endif
 
-#define SOFTWARE_SERIAL_RX       10
-#define SOFTWARE_SERIAL_TX       11
+#define SOFTWARE_SERIAL_RX       24
+#define SOFTWARE_SERIAL_TX       25
 
 class GPS_CLASS {
   public :

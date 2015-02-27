@@ -19,6 +19,7 @@ void GPS_CLASS::recvGPS(float *lat, float *lon)
   unsigned long chars;
   unsigned short sentences, failed; 
 
+  Serial.println("check");
   // For one second we parse GPS data and report some key values
   for (unsigned long start = millis(); millis() - start < 1000;)
   { 

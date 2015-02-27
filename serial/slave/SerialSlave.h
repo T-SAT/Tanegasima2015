@@ -91,6 +91,7 @@ public:
   int saveSD(sensorData data, unsigned long int time);
 
 public :
+
   static float recvGPS(char *select);
 };
 

@@ -1,13 +1,12 @@
 #include <Wire.h>
 #include <SD.h>
-#include <SoftwareSerial.h>
 #include <TinyGPS.h>
 #include "SerialSlave.h"
 #include "SensorStick_9DoF.h"
+#include <SoftwareSerial.h>
 
 SerialSlave Slave;
 sensorData _data;
-
 SoftwareSerial ss(12, 11);
 TinyGPS gpsSerial;
 
@@ -23,7 +22,6 @@ void SerialSlave::receive_data(ring_buffer *buf)
   noInterrupts();
   check = Serial.read();
   interrupts();
-  delay(100);
   Serial.print(RECEIVE);
   Wire.begin(SLAVE_DEVICE_NUM);
 
@@ -63,6 +61,8 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
       _data.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');
       _data.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');
+      _data.Data.gps.gps_data.flat = recvGPS("lat");
+      _data.Data.gps.gps_data.flon = recvGPS("lon");
       Wire.onRequest(send_All);
       Serial.print(START);
       break;
@@ -127,7 +127,7 @@ float SerialSlave::recvGPS(char *select)
   bool newData = false;
   unsigned long chars;
   unsigned short sentences, failed; 
- 
+
   ss.begin(9600);
   // For one second we parse GPS data and report some key values
   for (unsigned long start = millis(); millis() - start < 1000;)
@@ -147,15 +147,11 @@ float SerialSlave::recvGPS(char *select)
     unsigned long age;
     gpsSerial.f_get_position(&flat, &flon, &age);
     /*
-    Serial.print(flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6);
-     Serial.print(",");
-     Serial.println(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
-     */
+    Serial.print(",");
+    Serial.println(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
+    */
+
     return(select == "lat" ? flat : flon);
   }
 }  
-
-
-
-
 
