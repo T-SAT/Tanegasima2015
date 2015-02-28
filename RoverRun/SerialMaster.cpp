@@ -25,7 +25,7 @@ void SerialMaster::request_data(char select_num)
 
   time = millis();
   while(Serial.read() != ENABLE){
-    if(5000 < millis() - time)
+    if(2000 < millis() - time)
       break;
   }
 
@@ -46,7 +46,7 @@ void SerialMaster::request_data(char select_num)
       Serial.print(select_num);
       delay(70);
       check = Serial.read();
-      if(1000 < millis() - time)
+      if(1500 < millis() - time)
         break; 
     }
   }
@@ -100,7 +100,7 @@ void SerialMaster::request_data(char select_num)
     time = millis();
     while(!Wire.available()){
       Wire.requestFrom(SLAVE_DEVICE_NUM, sizeof(float)*2);
-      delay(1500);
+      delay(3000);
       if(5000 < millis() - time)
         break;
     }
@@ -247,7 +247,7 @@ int SerialMaster::saveData(File saveFile, sensorData data, unsigned long int tim
 }
 
 int SerialMaster::saveLog(File saveFile, char *str, float data, unsigned long int time){
-  
+
   saveFile = SD.open("control_log.txt", FILE_WRITE);
 
   if(saveFile){
@@ -280,5 +280,6 @@ int SerialMaster::saveLog(File saveFile, char *str){
 
   return(0);
 }
+
 
 

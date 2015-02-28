@@ -44,14 +44,27 @@ void Run::rollInit(void)
   attachInterrupt(1, get_rollInstrumentR, FALLING);
 }
 
-void Run::get_distance(void)
+float Run::get_lineDistance(void)
 {
+  float tmp;
 
+  tmp = rover.distance*cos(PI - rover.angle) + (tan(rover.angle - goal.angle))/(rover.distance*sin(rover.angle - PI/2));
+  return(tmp);
 }
 
-void Run::get_angle(void)
+float Run::get_lineAngle(void)
 {
+  return(rover.angle - goal.angle);
+}
 
+
+float Run::get_lineGyro(void)
+{
+  float gyro;
+
+  Master.request_data(GYRO_NUM);
+  gyro = Master.get(GYRO_NUM,'z');
+  return(last_targetValue - gyro);
 }
 
 float Run::get_angle(float vec1X, float vec1Y, float vec2X, float vec2Y)
@@ -89,6 +102,11 @@ float Run::get_angle(float vec1X, float vec1Y, float vec2X, float vec2Y)
   else return(0);
 }
 
+float Run::get_targetValue(void)
+{
+  return(last_targetValue);
+}
+
 int Run::crossProduct(float vec1X, float vec1Y, float vec2X, float vec2Y)
 {
   float tmp;
@@ -97,11 +115,6 @@ int Run::crossProduct(float vec1X, float vec1Y, float vec2X, float vec2Y)
   if(tmp < 0) return(1);
   else if(0 < tmp) return(-1);
   else return(0);
-}
-
-float Run::get_gyro(void)
-{
-
 }
 
 unsigned long int Run::rollInstrumentL(void)
@@ -141,7 +154,32 @@ void Run::get_rollInstrumentR(void)
 
 void Run::motor_control(int motorL, int motorR)
 {
+  if(motorL>0 && motorR<0){
+    digitalWrite(motorPinRF, LOW);
+    analogWrite(motorPinRB, -motorR);
+    analogWrite(motorPinLF, motorL);
+    digitalWrite(motorPinLB, LOW);
+  }
 
+  else if(motorL<0 && motorR>0){   
+    analogWrite(motorPinRF, motorR);
+    digitalWrite(motorPinRB, LOW);
+    digitalWrite(motorPinLF, LOW);
+    analogWrite(motorPinLB, -motorL);
+  }
+
+  else if(motorR<0 && motorL<0){
+    digitalWrite(motorPinRF, LOW);
+    analogWrite(motorPinRB, -motorR);
+    digitalWrite(motorPinLF, LOW);
+    analogWrite(motorPinLB, -motorL);
+  }
+  else {
+    analogWrite(motorPinRF, motorR);
+    digitalWrite(motorPinRB, LOW);
+    analogWrite(motorPinLF, motorL);
+    digitalWrite(motorPinLB, LOW);
+  } 
 }
 
 void Run::motor_controlVolt(float motorL, float motorR)
@@ -155,7 +193,6 @@ void Run::motor_controlVolt(float motorL, float motorR)
   dutyR = (int)(motorR/volt) * 255;
 
   motor_control(dutyL, dutyR);
-
 }
 
 void Run::turn(float target_value)
@@ -196,51 +233,24 @@ void Run::turn(float target_value)
 
 }
 
-void Run::steer(void)
-{
-}
-
-float Run::forward(float target_value)
+void Run::steer(float current_value, float target_value)
 {
   const double p_gain=1.0; //Pゲイン
   const double i_gain=0.001; //Iゲイン（多すぎると暴走します）
   const double d_gain=0.5; //Dゲイン
-  double control_valueL=0.0; //制御量（モータなどへの入力量）
-  double control_valueR=0.0;
-  //割り込みタイマー処理(H8ならITUなど。一定周期でループする。
-  double current_valueL, current_valueR; //現在の出力値
-  static double last_valueL=0.0; //一つ前の出力値（要保存のためstatic）
-  static double last_valueR=0.0;
-  double errorL, errorR, d_errorL, d_errorR; //偏差、偏差の微小変化量
-  static double i_errorL=0.0; //偏差の総和（要保存のためstatic
-  static double i_errorR=0.0;
-  float distance = 0.0;
-  double dt; 
-
-  dt = getDt();
-  current_valueL = 1/time00;
-  current_valueR = 1/time10;
-
-  distance += PI*WHEEL_R*(current_valueL + current_valueR);
-
-  errorL = target_value - current_valueL; //偏差の計算
-  errorR = target_value - current_valueR;
-
-  d_errorL = current_valueL - last_valueL; //偏差微小変化量の計算
-  d_errorR = current_valueR - last_valueR;
-
-  control_valueL = p_gain*errorL + i_gain*i_errorL + d_gain*d_errorL;
-  control_valueR = p_gain*errorR + i_gain*i_errorR + d_gain*d_errorR;
-
-  motor_controlVolt(control_valueL, control_valueR);
+  static double control_value=0.0; //制御量（モータなどへの入力量）
+  //割り込みタイマー処理(H8ならITUなど。一定周期でwループする。
+  static double last_value = 0.0; //一つ前の出力値（要保存のためstatic）
+  double error, d_error; //偏差、偏差の微小変化量
+  static double i_error=0.0; //偏差の総和（要保存のためstatic
+ 
+  error = target_value - current_value; //偏差の計算
+  d_error = current_value - last_value;
+  control_value = p_gain*error + i_gain*i_error + d_gain*d_error;
+  motor_control(125+control_value, 125-control_value);
   //制御量の計算 
-  last_valueL = current_valueL; //一つ前の出力値を更新
-  last_valueR = current_valueR;
-
-  i_errorL += errorL; //偏差の総和を更新
-  i_errorR += errorR;
-
-  return(distance);
+  last_value = current_value; //一つ前の出力値を更新
+  i_error += error; //偏差の総和を更新
 } 
 
 float Run::batt_voltage(void)
@@ -262,6 +272,23 @@ double Run::getDt(void)
   lastTime = nowTime;
 
   return( time );
+}
+
+void Run::update_PolarCoordinates(float d, float Dseata)
+{
+  //float Dseata = angle - rover.angle;
+
+  rover.distance = rover.distance*cos(Dseata) + sqrt(pow(rover.distance, 2)*(pow(cos(Dseata), 2) - 1) + pow(d, 2));
+  rover.angle += Dseata;
+}
+
+void Run::update_targetValue(float gyro, double dt)
+{
+  const double Kd=1.0; //Pゲイン
+  const double Ka=0.001; //Iゲイン（多すぎると暴走します）
+  const double Kg=0.5; //Dゲイン
+
+  last_targetValue = gyro + dt*(-Kd*get_lineDistance() - Ka*get_lineAngle() - Kg*get_lineGyro());
 }
 
 ECEF Run::GEDE2ECEF(GEDE cod, double height)
@@ -334,22 +361,113 @@ ENU Run::GEDE2ENU(GEDE origin, GEDE dest, double high)
   return(tmp_enu);
 }
 
+void Run::setCoordinates(char *str, float flat, float flon)
+{
+  if(str == "origin"){
+    ORIGIN.LAT = flat;
+    ORIGIN.LON = flon;
+  } 
+  else if(str == "goal"){
+    GOAL.LAT = flat;
+    GOAL.LON = flon;
+  } 
+  else if(str == "landing"){
+    LANDING.LAT = flat;
+    LANDING.LON = flon;
+  } 
+}
+
+void Run::setENU(char *str, ENU enu)
+{
+  if(str == "origin"){
+    originENU.E = enu.E;
+    originENU.N = enu.N;
+    originENU.U = enu.U;
+  } 
+  else if(str == "goal"){
+    goalENU.E = enu.E;
+    goalENU.N = enu.N;
+    goalENU.U = enu.U;
+  }
+
+}
+
+void Run::setPolarCoordinates(char *str, float distance, float angle)
+{
+  if(str == "goal"){
+    goal.distance = distance;
+    goal.angle = angle;
+  } 
+  else if(str == "rover"){
+    rover.distance = distance;
+    goal.angle = angle;
+  }
+}
+
+PolarCoordinates Run::ENU2PolarCoordinates(ENU enu1, ENU enu2)
+{
+  float angle, distance;
+  PolarCoordinates tmp;
+
+  angle = get_angle(enu1.E, enu1.N, enu2.E, enu2.N);
+  distance = sqrt(pow(enu2.E, 2) + pow(enu2.N, 2));
+  tmp.distance = distance;
+  tmp.angle = angle;
+
+  return(tmp);
+}
+
+ENU Run::PolarCoordinates2ENU(PolarCoordinates polar)
+{
+  ENU tmp;
+
+  tmp.E = polar.distance * cos(polar.angle*DEG_TO_RAD);
+  tmp.N = polar.distance * sin(polar.angle*DEG_TO_RAD);
+
+  return(tmp);
+}
+
+float Run::distanceOFgoal2current(GEDE current)
+{
+  ENU tmp;
+
+  tmp = GEDE2ENU(current, GOAL, HEIGHT);
+
+  return(sqrt(pow(tmp.E, 2) + pow(tmp.N, 2)));
+}
+
+void Run::improveCurrentCoordinates(GEDE current)
+{
+  ENU current_correct, current_polar;
+  float distance;
+  ENU tmp;
+
+  current_correct = GEDE2ENU(ORIGIN, current, HEIGHT);
+  current_polar = PolarCoordinates2ENU(rover);
+  distance = sqrt(pow(current_correct.E - current_polar.E, 2) + pow(current_correct.N - current_polar.N, 2));
+
+  if(max(distance, -distance) > 10.0){
+    tmp = GEDE2ENU(ORIGIN, current, HEIGHT);
+    rover = ENU2PolarCoordinates(originENU, tmp);
+  }
+}
+
 double Run::kalmanFilter_DistanceX(double accel, double distance, double dt)
 {
   static double x[2] = {
-    0.0, 0.0                  };
+    0.0, 0.0                                };
   static double P[2][2] = { 
     {
-      0, 0                                    }
+      0, 0                                                                }
     , {
-      0, 0                                    }
+      0, 0                                                                }
   };
   static double K[2];
   const  double Q[2][2] = { 
     {
-      0.01, 0                                    }
+      0.01, 0                                                                }
     , {
-      0, 0.003                                    }
+      0, 0.003                                                                }
   }; 
   const  double R = 1.0;
 
@@ -379,19 +497,19 @@ double Run::kalmanFilter_DistanceX(double accel, double distance, double dt)
 double Run::kalmanFilter_DistanceY(double accel, double distance, double dt)
 {
   static double x[2] = {
-    0.0, 0.0                  };
+    0.0, 0.0                                };
   static double P[2][2] = { 
     {
-      0, 0                                    }
+      0, 0                                                                }
     , {
-      0, 0                                    }
+      0, 0                                                                }
   };
   static double K[2];
   const  double Q[2][2] = { 
     {
-      0.01, 0                                    }
+      0.01, 0                                                                }
     , {
-      0, 0.003                                    }
+      0, 0.003                                                                }
   }; 
   const  double R = 1.0;
 
@@ -476,7 +594,7 @@ void Run::matmat(double c[NUM][NUM],double a[NUM][NUM],double b[NUM][NUM])
     }
     r = 0;
   }
-  
+
 }
 
 
@@ -491,6 +609,13 @@ ENU Run::matvec(double mat[3][3], ECEF vector)
 
   return(tmp);
 }
+
+
+
+
+
+
+
 
 
 

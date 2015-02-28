@@ -23,7 +23,6 @@ void SerialSlave::receive_data(ring_buffer *buf)
   check = Serial.read();
   interrupts();
   Serial.print(RECEIVE);
-  Wire.begin(SLAVE_DEVICE_NUM);
 
   if(check == GPS_NUM || check == ACCEL_NUM || check == GYRO_NUM || check == ALL_NUM){
     switch(check){
@@ -39,6 +38,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
       _data.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');
       _data.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');
+      Wire.begin(SLAVE_DEVICE_NUM);
       Wire.onRequest(send_Accel);
       Serial.print(START);
       break;
@@ -48,6 +48,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.gyro.float_data.xG = IMU.get(GYR,'x') - IMU.getZero(GYR,'x');
       _data.Data.gyro.float_data.yG = IMU.get(GYR,'y') - IMU.getZero(GYR,'y');
       _data.Data.gyro.float_data.zG = IMU.get(GYR,'z') - IMU.getZero(GYR,'z');
+      Wire.begin(SLAVE_DEVICE_NUM);
       Wire.onRequest(send_Gyro);
       Serial.print(START);
       break;
@@ -61,8 +62,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
       _data.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');
       _data.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');
-      _data.Data.gps.gps_data.flat = recvGPS("lat");
-      _data.Data.gps.gps_data.flon = recvGPS("lon");
+      Wire.begin(SLAVE_DEVICE_NUM);
       Wire.onRequest(send_All);
       Serial.print(START);
       break;

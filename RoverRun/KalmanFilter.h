@@ -19,7 +19,9 @@ class KalmanFilter{
     double kalmanFilter_9DOFX(double u, double y, double dt);
     double kalmanFilter_9DOFY(double u, double y, double dt);
     double kalmanFilter_Barometer(double accel, double altitude, double dt);
-    double kalmanFilter_Distance(double accel, double distance, double dt);
+    double kalmanFilter_DistanceX(double accel, double distance, double dt);
+    double kalmanFilter_DistanceY(double accel, double distance, double dt);
+    double kalmanFilter_Gyro(double gyro, double angle, double dt);
     
   public:
     double getState() const;

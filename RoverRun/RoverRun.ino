@@ -3,47 +3,102 @@
 #include <wiring_private.h>
 #include "Run.h"
 #include "SerialMaster.h"
+#include "KalmanFilter.h"
 #include <SoftwareSerial.h>
 
 File saveFile;
 
 void setup()
 {
-  Serial.begin(9600);
-  run.motorInit(2, 3, 4, 5);
-  //run.rollInit();
-  pinMode(10, OUTPUT);
-  if(!SD.begin(8)) {
-    Serial.println("initialization failed!");
-  }
+  GEDE tmp1, tmp2, goal;
+  ENU enu1, enu2;
+  PolarCoordinates polar1, polar2;
+  float distance=0;
+  double dt;
+  float angle;
 
+  Serial.begin(9600);
+  run.motorInit(5, 4, 6, 7);
+  pinMode(10, OUTPUT);
+  SD.begin(8);
   Wire.begin();
+
+  /*
+  goal.LAT = 134.1233;
+   goal.LON = 32.333;
+   run.setCoordinates("goal", 134.1233, 32.333);
+   Master.request_data(GPS_NUM);
+   tmp1.LAT = Master.get(GPS_NUM,'x');
+   tmp1.LON = Master.get(GPS_NUM,'y');
+   run.setCoordinates("landiing", tmp1.LAT, tmp1.LON);
+   Master.saveLog(saveFile, "landing lat :", tmp1.LAT, millis());
+   Master.saveLog(saveFile, "landing lon :", tmp1.LON, millis());
+   
+   do {
+   dt = Kalman.getDt();
+   distance += run.forward(dt);
+   } 
+   while(distance < 5.0);
+   
+   Master.request_data(GPS_NUM);
+   tmp2.LAT = Master.get(GPS_NUM,'x');
+   tmp2.LON = Master.get(GPS_NUM,'y');
+   enu1 = run.GEDE2ENU(tmp1, tmp2, HEIGHT);
+   enu2 = run.GEDE2ENU(tmp2, goal, HEIGHT);
+   angle = run.get_angle(enu1.E, enu1.N, enu2.E, enu2.N);
+   
+   run.setCoordinates("origin", tmp2.LAT, tmp2.LON);
+   Master.saveLog(saveFile, "origin lat :", tmp2.LAT, millis());
+   Master.saveLog(saveFile, "origin lon :", tmp2.LON, millis());
+   run.setENU("origin", enu1);
+   run.setENU("goal", enu2);
+   run.setPolarCoordinates("goal", sqrt(pow(enu2.E, 2) + pow(enu2.N, 2)), angle);
+   run.setPolarCoordinates("rover", 0.0, 0.0);
+   */
 }
 
 void loop()
 {
-  GEDE tmp1, tmp2;
-  ENU enu;
-  ECEF ecef, ecef_o;
-  double high1, high2;
- 
-  tmp1.LAT = 38.14227288;
-  tmp1.LON = 140.93265738;
-  high1 = 45.664;
-  
-  tmp2.LAT = 38.13877338;
-  tmp2.LON = 140.89872429;
-  high2 = 44.512;
-  
-  ecef = run.GEDE2ECEF(tmp1, high1);
-  ecef_o = run.GEDE2ECEF(tmp2, high2);
-  enu = run.ECEF2ENU(ecef_o, ecef);
-  
-  Serial.print(enu.E);  Serial.print('\t'); 
-  Serial.print(enu.N);  Serial.print('\t'); 
-  Serial.println(enu.U);  
-  delay(1000);
-  
+  GEDE gede;
+  float accXval, accYval, accZval;
+  float gyroXval, gyroYval, gyroZval;
+  float distanceOFgoal2current;
+
+  run.motor_controlVolt(run.batt_voltage()/2, run.batt__voltage()/2);
+/*
+  Master.request_data(ALL_NUM);
+  accXval = Master.get(ACCEL_NUM,'x');
+  accYval = Master.get(ACCEL_NUM,'y');
+  gyroZval = Master.get(GYRO_NUM,'z');
+  gede.LAT = Master.get(GPS_NUM,'x');
+  gede.LON = Master.get(GPS_NUM,'y');
+  double dt = run.getDt();
+
+  ///////////////値更新//////////////////////
+  run.update_PolarCoordinates(sqrt(pow(accXval,2) + pow(accYval,2))*dt, gyroZval*dt);
+  run.update_targetValue(gyroZval, dt);
+  ///////////////////////////////////////////
+
+  //////////////ゴール判定///////////////////
+  distanceOFgoal2current = run.distanceOFgoal2current(gede);
+  if(distanceOFgoal2current < 1.0)
+    while(1);
+  ///////////////////////////////////////////
+
+  /////////////ずれ修正//////////////////////
+  run.improveCurrentCoordinates(gede);
+  //////////////////////////////////////////
+
+  /////////////ステアリング制御/////////////
+  run.steer(gyroZval, run.get_targetValue());
+  //////////////////////////////////////////
+*/
 }
+
+
+
+
+
+
 
 
