@@ -64,9 +64,7 @@ void loop()
   float gyroXval, gyroYval, gyroZval;
   float distanceOFgoal2current;
 
-  run.motor_controlVolt(run.batt_voltage()/2, run.batt__voltage()/2);
-/*
-  Master.request_data(ALL_NUM);
+  Master.request_data(ACCEL_NUM);
   accXval = Master.get(ACCEL_NUM,'x');
   accYval = Master.get(ACCEL_NUM,'y');
   gyroZval = Master.get(GYRO_NUM,'z');
@@ -74,26 +72,29 @@ void loop()
   gede.LON = Master.get(GPS_NUM,'y');
   double dt = run.getDt();
 
+  Serial.println(accXval);
+  /*
   ///////////////値更新//////////////////////
-  run.update_PolarCoordinates(sqrt(pow(accXval,2) + pow(accYval,2))*dt, gyroZval*dt);
-  run.update_targetValue(gyroZval, dt);
-  ///////////////////////////////////////////
-
-  //////////////ゴール判定///////////////////
-  distanceOFgoal2current = run.distanceOFgoal2current(gede);
-  if(distanceOFgoal2current < 1.0)
+   run.update_PolarCoordinates(sqrt(pow(accXval,2) + pow(accYval,2))*dt, gyroZval*dt);
+   run.update_targetValue(gyroZval, dt);
+   ///////////////////////////////////////////
+   
+   //////////////ゴール判定///////////////////
+   distanceOFgoal2current = run.distanceOFgoal2current(gede);
+   if(distanceOFgoal2current < 1.0)
     while(1);
-  ///////////////////////////////////////////
-
-  /////////////ずれ修正//////////////////////
-  run.improveCurrentCoordinates(gede);
-  //////////////////////////////////////////
-
-  /////////////ステアリング制御/////////////
-  run.steer(gyroZval, run.get_targetValue());
-  //////////////////////////////////////////
-*/
+   ///////////////////////////////////////////
+   
+   /////////////ずれ修正//////////////////////
+   run.improveCurrentCoordinates(gede);
+   //////////////////////////////////////////
+   
+   /////////////ステアリング制御/////////////
+   run.steer(gyroZval, run.get_targetValue());
+   //////////////////////////////////////////
+   */
 }
+
 
 
 

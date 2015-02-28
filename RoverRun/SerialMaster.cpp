@@ -25,7 +25,7 @@ void SerialMaster::request_data(char select_num)
 
   time = millis();
   while(Serial.read() != ENABLE){
-    if(2000 < millis() - time)
+    if(5000 < millis() - time)
       break;
   }
 
