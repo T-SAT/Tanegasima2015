@@ -71,22 +71,25 @@ void setup()
 void loop()
 {
   GEDE gede;
+  sensorData data;
   float accXval, accYval, accZval;
   float gyroXval, gyroYval, gyroZval;
   float distanceOFgoal2current;
 
-
   Master.request_data(ALL_NUM);
-  accXval = Master.get(ACCEL_NUM,'x');
-  accYval = Master.get(ACCEL_NUM,'y');
-  gyroZval = Master.get(GYRO_NUM,'z');
-  gede.LAT = Master.get(GPS_NUM,'x');
-  gede.LON = Master.get(GPS_NUM,'y');
+  data.Data.accel.float_data.xA = Master.get(ACCEL_NUM,'x');
+  data.Data.accel.float_data.yA = Master.get(ACCEL_NUM,'y');
+  data.Data.accel.float_data.zA = Master.get(ACCEL_NUM,'z');
+  data.Data.gyro.float_data.xG = Master.get(GYRO_NUM,'x');
+  data.Data.gyro.float_data.yG = Master.get(GYRO_NUM,'y');
+  data.Data.gyro.float_data.zG = Master.get(GYRO_NUM,'z');
+  data.Data.gps.gps_data.flat = Master.get(GPS_NUM,'x');
+  data.Data.gps.gps_data.flon = Master.get(GPS_NUM,'y');
 
-  run.steer(gyroZval, -30.0);
-  /*
+  Master.saveData(data);
   double dt = run.getDt();
-   
+
+  /*
    ///////////////値更新//////////////////////
    run.update_PolarCoordinates((sqrt(pow(accXval,2) + pow(accYval,2))*9.8*pow(dt, 2))/2, gyroZval*dt);
    run.update_targetValue(gyroZval, dt);
@@ -107,6 +110,8 @@ void loop()
    //////////////////////////////////////////
    */
 }
+
+
 
 
 

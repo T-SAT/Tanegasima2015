@@ -3,7 +3,8 @@
 #include "SerialMaster.h"
 
 SerialMaster Master;
-File saveFile;
+File dataFile;
+File logFile;
 
 SerialMaster::SerialMaster(void)
 {
@@ -204,40 +205,41 @@ float SerialMaster::get(char sensor, char axis)
 
 }
 
-int SerialMaster::saveData(sensorData data, unsigned long int time){
+int SerialMaster::saveData(sensorData data)
+{
   static int initFlag=0;
 
-  saveFile = SD.open("Dlog.txt", FILE_WRITE);
+  dataFile = SD.open("Dlog.txt", FILE_WRITE);
 
-  if(saveFile) {
+  if(dataFile) {
     if(initFlag == 0) {
-      saveFile.println("xA,yA,zA,xG,yG,zG,LAT,LON,AGE,time");
-      saveFile.close();
+      dataFile.println("xA,yA,zA,xG,yG,zG,LAT,LON,AGE,time");
+      dataFile.close();
       initFlag = 1;
     }
 
     else {
-      saveFile.print(data.Data.accel.float_data.xA);
-      saveFile.print(",");
-      saveFile.print(data.Data.accel.float_data.yA);
-      saveFile.print(",");
-      saveFile.print(data.Data.accel.float_data.zA);
-      saveFile.print(",");
-      saveFile.print(data.Data.gyro.float_data.xG);
-      saveFile.print(",");
-      saveFile.print(data.Data.gyro.float_data.yG);
-      saveFile.print(",");
-      saveFile.print(data.Data.gyro.float_data.zG);
-      saveFile.print(",");
-      saveFile.print(data.Data.gps.gps_data.flat);
-      saveFile.print(",");
-      saveFile.print(data.Data.gps.gps_data.flon);
-      saveFile.print(",");
-      saveFile.print(data.Data.gps.gps_data.flat);
-      saveFile.print(",");
-      saveFile.print(time);
-      saveFile.println();
-      saveFile.close();
+      dataFile.print(data.Data.accel.float_data.xA);
+      dataFile.print(",");
+      dataFile.print(data.Data.accel.float_data.yA);
+      dataFile.print(",");
+      dataFile.print(data.Data.accel.float_data.zA);
+      dataFile.print(",");
+      dataFile.print(data.Data.gyro.float_data.xG);
+      dataFile.print(",");
+      dataFile.print(data.Data.gyro.float_data.yG);
+      dataFile.print(",");
+      dataFile.print(data.Data.gyro.float_data.zG);
+      dataFile.print(",");
+      dataFile.print(data.Data.gps.gps_data.flat);
+      dataFile.print(",");
+      dataFile.print(data.Data.gps.gps_data.flon);
+      dataFile.print(",");
+      dataFile.print(data.Data.gps.gps_data.flat);
+      dataFile.print(",");
+      dataFile.print(millis());
+      dataFile.println();
+      dataFile.close();
     }
   }
 
@@ -248,16 +250,19 @@ int SerialMaster::saveData(sensorData data, unsigned long int time){
   return(0);
 }
 
-int SerialMaster::saveLog(char *str, float data, unsigned long int time){
+int SerialMaster::saveLog(char *str, float data)
+{
 
-  saveFile = SD.open("Clog.txt", FILE_WRITE);
+  logFile = SD.open("Clog.txt", FILE_WRITE);
 
-  if(saveFile){
-    saveFile.print(str); 
-    saveFile.print(data);
-    saveFile.print(time);
-    saveFile.println();
-    saveFile.close();
+  if(logFile){
+    logFile.print(str); 
+    logFile.print(",");
+    logFile.print(data);
+    logFile.print(",");
+    logFile.print(millis());
+    logFile.println();
+    logFile.close();
   }
 
   else {
@@ -266,24 +271,4 @@ int SerialMaster::saveLog(char *str, float data, unsigned long int time){
 
   return(0);
 }
-
-
-int SerialMaster::saveLog(char *str){
-
-  saveFile = SD.open("Clog.txt", FILE_WRITE);
-
-  if(saveFile){
-    saveFile.print(str);
-    saveFile.println();
-    saveFile.close();
-  }
-
-  else {
-    return(-1);
-  }
-
-  return(0);
-}
-
-
 

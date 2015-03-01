@@ -236,7 +236,7 @@ void Run::turn(float target_value)
 
 void Run::steer(float current_value, float target_value)
 {
-  const double p_gain=1.0; //Pゲイン
+  const double p_gain=0.5;//1.0; //Pゲイン
   const double i_gain=0.001;//0.001; //Iゲイン（多すぎると暴走します）
   const double d_gain=0.5; //Dゲイン
   double control_value=0.0;
@@ -252,9 +252,9 @@ void Run::steer(float current_value, float target_value)
   control_value = p_gain*error + i_gain*i_error + d_gain*d_error;
   control_valueL = (control_value < 0 ? -1 : 1)*(constrain(abs(control_value), 3, 127));
   control_valueR = (control_value < 0 ? -1 : 1)*(constrain(abs(control_value), 3, 127) - 2);  
-  Master.saveLog("c_value:", current_value, millis());
-  Master.saveLog("dutyL :", 125.0 - control_value, millis());
-  Master.saveLog("dutyR :", 125.0 + control_value, millis()); 
+  Master.saveLog("c_value:", current_value);
+  Master.saveLog("dutyL :", 125.0 - control_valueL);
+  Master.saveLog("dutyR :", 125.0 + control_valueR); 
   motor_control(127-control_valueL, 127+control_valueR);
   //制御量の計算 
   last_value = current_value; //一つ前の出力値を更新
