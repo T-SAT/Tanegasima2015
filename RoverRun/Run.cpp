@@ -1,5 +1,6 @@
 #include "Run.h"
 #include "SerialMaster.h"
+#include <SD.h>
 #include <wiring_private.h>
 
 Run run;
@@ -236,28 +237,35 @@ void Run::turn(float target_value)
 void Run::steer(float current_value, float target_value)
 {
   const double p_gain=1.0; //Pゲイン
-  const double i_gain=0.001; //Iゲイン（多すぎると暴走します）
+  const double i_gain=0.001;//0.001; //Iゲイン（多すぎると暴走します）
   const double d_gain=0.5; //Dゲイン
-  static double control_value=0.0; //制御量（モータなどへの入力量）
+  double control_value=0.0;
+  double control_valueL=0.0; //制御量（モータなどへの入力量）
+  double control_valueR=0.0;
   //割り込みタイマー処理(H8ならITUなど。一定周期でwループする。
   static double last_value = 0.0; //一つ前の出力値（要保存のためstatic）
   double error, d_error; //偏差、偏差の微小変化量
   static double i_error=0.0; //偏差の総和（要保存のためstatic
- 
+
   error = target_value - current_value; //偏差の計算
   d_error = current_value - last_value;
   control_value = p_gain*error + i_gain*i_error + d_gain*d_error;
-  motor_control(125+control_value, 125-control_value);
+  control_valueL = (control_value < 0 ? -1 : 1)*(constrain(abs(control_value), 3, 127));
+  control_valueR = (control_value < 0 ? -1 : 1)*(constrain(abs(control_value), 3, 127) - 2);  
+  Master.saveLog("c_value:", current_value, millis());
+  Master.saveLog("dutyL :", 125.0 - control_value, millis());
+  Master.saveLog("dutyR :", 125.0 + control_value, millis()); 
+  motor_control(127-control_valueL, 127+control_valueR);
   //制御量の計算 
   last_value = current_value; //一つ前の出力値を更新
   i_error += error; //偏差の総和を更新
-} 
+}
 
 float Run::batt_voltage(void)
 {
   float batt_voltage = 0.0;
 
-  batt_voltage = (analogRead(A1) - 4.0) / 100.0;
+  batt_voltage = (analogRead(A0) - 4.0) / 100.0;
   return(batt_voltage);
 }
 
@@ -455,19 +463,19 @@ void Run::improveCurrentCoordinates(GEDE current)
 double Run::kalmanFilter_DistanceX(double accel, double distance, double dt)
 {
   static double x[2] = {
-    0.0, 0.0                                };
+    0.0, 0.0                                  };
   static double P[2][2] = { 
     {
-      0, 0                                                                }
+      0, 0                                                                    }
     , {
-      0, 0                                                                }
+      0, 0                                                                    }
   };
   static double K[2];
   const  double Q[2][2] = { 
     {
-      0.01, 0                                                                }
+      0.01, 0                                                                    }
     , {
-      0, 0.003                                                                }
+      0, 0.003                                                                    }
   }; 
   const  double R = 1.0;
 
@@ -497,19 +505,19 @@ double Run::kalmanFilter_DistanceX(double accel, double distance, double dt)
 double Run::kalmanFilter_DistanceY(double accel, double distance, double dt)
 {
   static double x[2] = {
-    0.0, 0.0                                };
+    0.0, 0.0                                  };
   static double P[2][2] = { 
     {
-      0, 0                                                                }
+      0, 0                                                                    }
     , {
-      0, 0                                                                }
+      0, 0                                                                    }
   };
   static double K[2];
   const  double Q[2][2] = { 
     {
-      0.01, 0                                                                }
+      0.01, 0                                                                    }
     , {
-      0, 0.003                                                                }
+      0, 0.003                                                                    }
   }; 
   const  double R = 1.0;
 
@@ -609,6 +617,7 @@ ENU Run::matvec(double mat[3][3], ECEF vector)
 
   return(tmp);
 }
+
 
 
 

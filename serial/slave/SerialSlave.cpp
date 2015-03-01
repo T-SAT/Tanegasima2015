@@ -8,11 +8,13 @@
 SerialSlave Slave;
 sensorData _data;
 SoftwareSerial ss(12, 11);
+SoftwareSerial ssRadio(2, 3);
 TinyGPS gpsSerial;
 
 SerialSlave::SerialSlave()
 {
   ss.begin(9600);
+  //ssRadio.begin(9600);
 }
 
 void SerialSlave::receive_data(ring_buffer *buf)
@@ -30,6 +32,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.gps.gps_data.flat = recvGPS("lat");
       _data.Data.gps.gps_data.flon = recvGPS("lon");
       Wire.onRequest(send_GPS);
+      Wire.begin(SLAVE_DEVICE_NUM);
       Serial.print(START);
       break;
 
@@ -62,6 +65,8 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
       _data.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');
       _data.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');
+      _data.Data.gps.gps_data.flat = recvGPS("lat");
+      _data.Data.gps.gps_data.flon = recvGPS("lon");
       Wire.begin(SLAVE_DEVICE_NUM);
       Wire.onRequest(send_All);
       Serial.print(START);
@@ -155,3 +160,30 @@ float SerialSlave::recvGPS(char *select)
   }
 }  
 
+int SerialSlave::saveRadio(unsigned long int time)
+{
+  _data.Data.gps.gps_data.flat = recvGPS("lat");
+  _data.Data.gps.gps_data.flon = recvGPS("lon");
+  ssRadio.print(_data.Data.accel.float_data.xA);  ssRadio.print(",");
+  ssRadio.print(_data.Data.accel.float_data.yA);  ssRadio.print(",");
+  ssRadio.print(_data.Data.accel.float_data.zA);  ssRadio.print(",");
+  ssRadio.print(_data.Data.gyro.float_data.xG);  ssRadio.print(",");
+  ssRadio.print(_data.Data.gyro.float_data.yG);  ssRadio.print(",");
+  ssRadio.print(_data.Data.gyro.float_data.zG);  ssRadio.print(",");
+  ssRadio.print(_data.Data.gps.gps_data.flat); ssRadio.print(",");
+  ssRadio.print(_data.Data.gps.gps_data.flon); ssRadio.print(",");
+  ssRadio.print(pressure);  ssRadio.print(",");
+  ssRadio.print(altitude);  ssRadio.print(",");
+  ssRadio.print(tempreture);  ssRadio.print(",");
+  ssRadio.print(time);
+  ssRadio.println();
+  
+  return(0);
+}
+
+int SerialSlave::saveRadio_begin(long speed)
+{
+  ssRadio.begin(speed);
+  ssRadio.print("xA,yA,zA,xG,yG,zG,LAT,LON,pressure,altitude,tempreture,time");
+  ssRadio.println();
+}

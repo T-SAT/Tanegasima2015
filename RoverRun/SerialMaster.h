@@ -79,9 +79,9 @@ public :
   float get(char sensor, char axis);
 
 public :
-  int saveData(File saveFile, sensorData data, unsigned long int time);
-  int saveLog(File saveFile, char *str, float data, unsigned long int time);
-  int saveLog(File saveFile, char *str);
+  int saveData(sensorData data, unsigned long int time);
+  int saveLog(char *str, float data, unsigned long int time);
+  int saveLog(char *str);
 
 private :
   sensorData _data;

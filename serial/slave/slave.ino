@@ -12,11 +12,10 @@ LPS331 ps;
 void setup() {
   float pressure, tempreture;
   float flat,flon;
-  
+
   Serial.begin(9600); 
   sensorInit();
   pinMode(10,OUTPUT);
-  
 
   Serial.print(ENABLE);
   Serial.setintr(Slave.receive_data);
@@ -24,11 +23,8 @@ void setup() {
 
 void loop() { 
   //⊿tの測定 bh
-  sensorData tmp;
-  unsigned long int time;
-  int check_sd;
 
-  delay(200);
+  delay(50);
 }
 
 void sensorInit()
@@ -36,6 +32,7 @@ void sensorInit()
   IMU.sensorInit();
   ps.init();
   ps.enableDefault();
+  Slave.saveRadio_begin(9600);
 }
 
 void cut_parachute(void)
@@ -45,3 +42,6 @@ void cut_parachute(void)
   delay(2000);
   digitalWrite(PARA_PIN, LOW);
 }
+
+
+

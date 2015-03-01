@@ -89,10 +89,16 @@ public:
   static void setData_Accel(float x, float y, float z);
   static void setData_Gyro(float x, float y, float z);
   int saveSD(sensorData data, unsigned long int time);
-
+  int saveRadio(unsigned long int time);
+  int saveRadio_begin(long speed);
+  
 public :
-
   static float recvGPS(char *select);
+  
+public :
+  float pressure;
+  float altitude;
+  float tempreture;
 };
 
 extern SerialSlave Slave;

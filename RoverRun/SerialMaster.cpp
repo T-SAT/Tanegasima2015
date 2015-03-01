@@ -3,6 +3,7 @@
 #include "SerialMaster.h"
 
 SerialMaster Master;
+File saveFile;
 
 SerialMaster::SerialMaster(void)
 {
@@ -203,10 +204,10 @@ float SerialMaster::get(char sensor, char axis)
 
 }
 
-int SerialMaster::saveData(File saveFile, sensorData data, unsigned long int time){
+int SerialMaster::saveData(sensorData data, unsigned long int time){
   static int initFlag=0;
 
-  saveFile = SD.open("data_log.txt", FILE_WRITE);
+  saveFile = SD.open("Dlog.txt", FILE_WRITE);
 
   if(saveFile) {
     if(initFlag == 0) {
@@ -234,7 +235,8 @@ int SerialMaster::saveData(File saveFile, sensorData data, unsigned long int tim
       saveFile.print(",");
       saveFile.print(data.Data.gps.gps_data.flat);
       saveFile.print(",");
-      saveFile.println(time);
+      saveFile.print(time);
+      saveFile.println();
       saveFile.close();
     }
   }
@@ -246,14 +248,15 @@ int SerialMaster::saveData(File saveFile, sensorData data, unsigned long int tim
   return(0);
 }
 
-int SerialMaster::saveLog(File saveFile, char *str, float data, unsigned long int time){
+int SerialMaster::saveLog(char *str, float data, unsigned long int time){
 
-  saveFile = SD.open("control_log.txt", FILE_WRITE);
+  saveFile = SD.open("Clog.txt", FILE_WRITE);
 
   if(saveFile){
-    saveFile.print(str);
+    saveFile.print(str); 
     saveFile.print(data);
-    saveFile.println(time);
+    saveFile.print(time);
+    saveFile.println();
     saveFile.close();
   }
 
@@ -265,12 +268,13 @@ int SerialMaster::saveLog(File saveFile, char *str, float data, unsigned long in
 }
 
 
-int SerialMaster::saveLog(File saveFile, char *str){
+int SerialMaster::saveLog(char *str){
 
-  saveFile = SD.open("control_log.txt", FILE_WRITE);
+  saveFile = SD.open("Clog.txt", FILE_WRITE);
 
   if(saveFile){
-    saveFile.println(str);
+    saveFile.print(str);
+    saveFile.println();
     saveFile.close();
   }
 

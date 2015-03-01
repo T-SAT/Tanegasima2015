@@ -116,12 +116,12 @@ class SensorStick_9DoF{
     void twiWrite(byte address, byte registerAddress, byte val);
     void twiWrite(byte address, byte registerAddress, byte val[], byte num);
     int twiRead(byte address, byte registerAddress,byte output[], byte num);
-    int _gyro[4];
-    int _acc[3];
-    int _mag[3];
-    int _gyroZero[4];
-    int _accZero[3];
-    int _magZero[3];
+    double _gyro[4];
+    double _acc[3];
+    double _mag[3];
+    double _gyroZero[4];
+    double  _accZero[3];
+    double _magZero[3];
 };
 
 extern SensorStick_9DoF IMU;

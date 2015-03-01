@@ -6,27 +6,26 @@
 #include "KalmanFilter.h"
 #include <SoftwareSerial.h>
 
-File saveFile;
-
 void setup()
 {
-  GEDE tmp1, tmp2, goal;
+  GEDE tmp1, tmp2, goal, current;
   ENU enu1, enu2;
   PolarCoordinates polar1, polar2;
+  sensorData tmp;
   float distance=0;
   double dt;
   float angle;
 
   Serial.begin(9600);
-  run.motorInit(5, 4, 6, 7);
+  run.motorInit(6, 7, 5, 4);
   pinMode(10, OUTPUT);
   SD.begin(8);
   Wire.begin();
 
-  /*
-  goal.LAT = 134.1233;
-   goal.LON = 32.333;
-   run.setCoordinates("goal", 134.1233, 32.333);
+  /*  
+   goal.LAT = 35.515659;
+   goal.LON = 134.171860;
+   run.setCoordinates("goal", goal.LAT, goal.LON);
    Master.request_data(GPS_NUM);
    tmp1.LAT = Master.get(GPS_NUM,'x');
    tmp1.LON = Master.get(GPS_NUM,'y');
@@ -34,12 +33,24 @@ void setup()
    Master.saveLog(saveFile, "landing lat :", tmp1.LAT, millis());
    Master.saveLog(saveFile, "landing lon :", tmp1.LON, millis());
    
+  /*
    do {
+   Master.request_data(ALL_NUM);
+   current.LAT = Master.get(GPS_NUM,'x');
+   current.LON = Master.get(GPS_NUM,'y');
+   tmp.Data.accel.float_data.xA = Master.get(ACCEL_NUM,'x');
+   tmp.Data.accel.float_data.yA = Master.get(ACCEL_NUM,'y');
+   tmp.Data.accel.float_data.zA = Master.get(ACCEL_NUM,'z');
+   tmp.Data.gyro.float_data.zG = Master.get(GYRO_NUM,'z');
+   current.LAT = Master.get(GPS_NUM,'x');
+   current.LON = Master.get(GPS_NUM,'y');
    dt = Kalman.getDt();
-   distance += run.forward(dt);
-   } 
+   distance += (sqrt(pow(tmp.Data.accel.float_data.xA, 2) + pow(tmp.Data.accel.float_data.yA, 2))*9.8*pow(dt, 2))/2.0;
+   run.steer(tmp.Data.gyro.float_data.zG, 0.0);
+   }
    while(distance < 5.0);
-   
+   run.motor_control(0.0, 0.0);
+  /*
    Master.request_data(GPS_NUM);
    tmp2.LAT = Master.get(GPS_NUM,'x');
    tmp2.LON = Master.get(GPS_NUM,'y');
@@ -64,25 +75,27 @@ void loop()
   float gyroXval, gyroYval, gyroZval;
   float distanceOFgoal2current;
 
-  Master.request_data(ACCEL_NUM);
+
+  Master.request_data(ALL_NUM);
   accXval = Master.get(ACCEL_NUM,'x');
   accYval = Master.get(ACCEL_NUM,'y');
   gyroZval = Master.get(GYRO_NUM,'z');
   gede.LAT = Master.get(GPS_NUM,'x');
   gede.LON = Master.get(GPS_NUM,'y');
-  double dt = run.getDt();
 
-  Serial.println(accXval);
+  run.steer(gyroZval, -30.0);
   /*
-  ///////////////値更新//////////////////////
-   run.update_PolarCoordinates(sqrt(pow(accXval,2) + pow(accYval,2))*dt, gyroZval*dt);
+  double dt = run.getDt();
+   
+   ///////////////値更新//////////////////////
+   run.update_PolarCoordinates((sqrt(pow(accXval,2) + pow(accYval,2))*9.8*pow(dt, 2))/2, gyroZval*dt);
    run.update_targetValue(gyroZval, dt);
    ///////////////////////////////////////////
    
    //////////////ゴール判定///////////////////
    distanceOFgoal2current = run.distanceOFgoal2current(gede);
    if(distanceOFgoal2current < 1.0)
-    while(1);
+   while(1);
    ///////////////////////////////////////////
    
    /////////////ずれ修正//////////////////////
@@ -94,6 +107,9 @@ void loop()
    //////////////////////////////////////////
    */
 }
+
+
+
 
 
 
