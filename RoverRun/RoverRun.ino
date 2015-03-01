@@ -6,6 +6,8 @@
 #include "KalmanFilter.h"
 #include <SoftwareSerial.h>
 
+GEDE lastGEDE;
+
 void setup()
 {
   GEDE tmp1, tmp2, goal, current;
@@ -16,6 +18,9 @@ void setup()
   double dt;
   float angle;
 
+  lastGEDE.LAT = 0.0;
+  lastGEDE.LON = 0.0;
+  
   Serial.begin(9600);
   run.motorInit(6, 7, 5, 4);
   pinMode(10, OUTPUT);
@@ -70,45 +75,55 @@ void setup()
 
 void loop()
 {
-  GEDE gede;
+  GEDE currentGEDE;
+  ENU tmp;
   sensorData data;
-  float accXval, accYval, accZval;
+  float accXval, accYval, accZval, AccVal;
   float gyroXval, gyroYval, gyroZval;
+  static double distance=0.0;
+  static double last_distance = 0.0;
+  double current_distance;
   float distanceOFgoal2current;
 
   Master.request_data(ALL_NUM);
   data.Data.accel.float_data.xA = Master.get(ACCEL_NUM,'x');
-  data.Data.accel.float_data.yA = Master.get(ACCEL_NUM,'y');
+  data.Data.accel.float_data.yA = accYval = Master.get(ACCEL_NUM,'y');
   data.Data.accel.float_data.zA = Master.get(ACCEL_NUM,'z');
   data.Data.gyro.float_data.xG = Master.get(GYRO_NUM,'x');
   data.Data.gyro.float_data.yG = Master.get(GYRO_NUM,'y');
   data.Data.gyro.float_data.zG = Master.get(GYRO_NUM,'z');
-  data.Data.gps.gps_data.flat = Master.get(GPS_NUM,'x');
-  data.Data.gps.gps_data.flon = Master.get(GPS_NUM,'y');
-
+  data.Data.gps.gps_data.flat = currentGEDE.LAT = Master.get(GPS_NUM,'x');
+  data.Data.gps.gps_data.flon = currentGEDE.LON = Master.get(GPS_NUM,'y');
   Master.saveData(data);
+  accYval = -accYval;
+  AccVal = sqrt(pow(accYval, 2) + pow(accXval, 2)) * 9.8;
+  tmp = run.GEDE2ENU(lastGEDE, currentGEDE, HEIGHT);
+  distance += sqrt(pow(tmp.E,2) + pow(tmp.N,2));
   double dt = run.getDt();
-
-  /*
+  
    ///////////////値更新//////////////////////
-   run.update_PolarCoordinates((sqrt(pow(accXval,2) + pow(accYval,2))*9.8*pow(dt, 2))/2, gyroZval*dt);
+   current_distance = Kalman.kalmanFilter_DistanceX(AccVal, distance, dt);
+   run.update_PolarCoordinates(current_distance - last_distance, gyroZval*dt);
    run.update_targetValue(gyroZval, dt);
+   lastGEDE.LAT = currentGEDE.LAT;
+   lastGEDE.LON = currentGEDE.LON;
+   last_distance = current_distance;
    ///////////////////////////////////////////
    
    //////////////ゴール判定///////////////////
-   distanceOFgoal2current = run.distanceOFgoal2current(gede);
+   distanceOFgoal2current = run.distanceOFgoal2current(currentGEDE);
    if(distanceOFgoal2current < 1.0)
    while(1);
    ///////////////////////////////////////////
    
    /////////////ずれ修正//////////////////////
-   run.improveCurrentCoordinates(gede);
+   run.improveCurrentCoordinates(currentGEDE);
    //////////////////////////////////////////
    
    /////////////ステアリング制御/////////////
-   run.steer(gyroZval, run.get_targetValue());
+   run.steer(data.Data.gyro.float_data.zG, run.get_targetValue());
    //////////////////////////////////////////
-   */
+   
 }
 
 
