@@ -6,19 +6,6 @@ SerialMaster Master;
 File dataFile;
 File logFile;
 
-SerialMaster::SerialMaster(void)
-{
-
-}
-
-void SerialMaster::write_numbers(int numbers, int dev_number)
-{
-  Wire.beginTransmission(dev_number);
-  Wire.write(numbers);
-  Wire.endTransmission();
-  delay(100);
-}
-
 void SerialMaster::request_data(char select_num)
 {
   int i=0;
@@ -205,6 +192,7 @@ float SerialMaster::get(char sensor, char axis)
 
 }
 
+/*
 int SerialMaster::saveData(sensorData data)
 {
   static int initFlag=0;
@@ -249,6 +237,7 @@ int SerialMaster::saveData(sensorData data)
 
   return(0);
 }
+*/
 
 int SerialMaster::saveLog(char *str, float data)
 {

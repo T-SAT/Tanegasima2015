@@ -113,8 +113,8 @@ int Run::crossProduct(float vec1X, float vec1Y, float vec2X, float vec2Y)
   float tmp;
 
   tmp = vec1X*vec2Y - vec2X*vec1Y;
-  if(tmp < 0) return(1);
-  else if(0 < tmp) return(-1);
+  if(tmp < 0) return(-1);
+  else if(0 < tmp) return(1);
   else return(0);
 }
 

@@ -73,13 +73,11 @@ sensorData;
 
 class SerialMaster{
 public :
-  SerialMaster();
-  void write_numbers(int , int);
   void request_data(char);
   float get(char sensor, char axis);
 
 public :
-  int saveData(sensorData data);
+  //int saveData(sensorData data);
   int saveLog(char *str, float data);
 private :
   sensorData _data;
@@ -88,6 +86,7 @@ private :
 extern SerialMaster Master;
 
 #endif
+
 
 
 
