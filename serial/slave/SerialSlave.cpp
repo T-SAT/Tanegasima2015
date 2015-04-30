@@ -29,8 +29,9 @@ void SerialSlave::receive_data(ring_buffer *buf)
   if(check == GPS_NUM || check == ACCEL_NUM || check == GYRO_NUM || check == ALL_NUM){
     switch(check){
     case GPS_NUM:
-      _data.Data.gps.gps_data.flat = recvGPS("lat");
-      _data.Data.gps.gps_data.flon = recvGPS("lon");
+      _data.Data.gps.gps_data.flat = recvGPS('x');
+      _data.Data.gps.gps_data.flon = recvGPS('y');
+      saveRadio_data(millis());
       Wire.onRequest(send_GPS);
       Wire.begin(SLAVE_DEVICE_NUM);
       Serial.print(START);
@@ -41,6 +42,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
       _data.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');
       _data.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');
+      saveRadio_data(millis());
       Wire.begin(SLAVE_DEVICE_NUM);
       Wire.onRequest(send_Accel);
       Serial.print(START);
@@ -51,6 +53,7 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.gyro.float_data.xG = IMU.get(GYR,'x') - IMU.getZero(GYR,'x');
       _data.Data.gyro.float_data.yG = IMU.get(GYR,'y') - IMU.getZero(GYR,'y');
       _data.Data.gyro.float_data.zG = IMU.get(GYR,'z') - IMU.getZero(GYR,'z');
+      saveRadio_data(millis());
       Wire.begin(SLAVE_DEVICE_NUM);
       Wire.onRequest(send_Gyro);
       Serial.print(START);
@@ -65,8 +68,9 @@ void SerialSlave::receive_data(ring_buffer *buf)
       _data.Data.accel.float_data.xA = IMU.get(ACC,'x') - IMU.getZero(ACC,'x');
       _data.Data.accel.float_data.yA = IMU.get(ACC,'y') - IMU.getZero(ACC,'y');
       _data.Data.accel.float_data.zA = IMU.get(ACC,'z') - IMU.getZero(ACC,'z');
-      _data.Data.gps.gps_data.flat = recvGPS("lat");
-      _data.Data.gps.gps_data.flon = recvGPS("lon");
+      _data.Data.gps.gps_data.flat = recvGPS('x');
+      _data.Data.gps.gps_data.flon = recvGPS('y');
+      saveRadio_data(millis());
       Wire.begin(SLAVE_DEVICE_NUM);
       Wire.onRequest(send_All);
       Serial.print(START);
@@ -127,7 +131,7 @@ void SerialSlave::setData_Gyro(float x, float y, float z)
   _data.Data.gyro.float_data.zG = z;
 }
 
-float SerialSlave::recvGPS(char *select)
+float SerialSlave::recvGPS(char select)
 {
   bool newData = false;
   unsigned long chars;
@@ -151,33 +155,36 @@ float SerialSlave::recvGPS(char *select)
     float flat, flon;
     unsigned long age;
     gpsSerial.f_get_position(&flat, &flon, &age);
-    /*
+/*
+    Serial.print(flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 6);
     Serial.print(",");
     Serial.println(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 6);
-    */
-
-    return(select == "lat" ? flat : flon);
+*/
+    return(select=='x' ? flat : flon);
   }
 }  
 
-int SerialSlave::saveRadio(unsigned long int time)
+int SerialSlave::saveRadio_data(unsigned long int time)
 {
-  _data.Data.gps.gps_data.flat = recvGPS("lat");
-  _data.Data.gps.gps_data.flon = recvGPS("lon");
-  ssRadio.print(_data.Data.accel.float_data.xA);  ssRadio.print(",");
-  ssRadio.print(_data.Data.accel.float_data.yA);  ssRadio.print(",");
-  ssRadio.print(_data.Data.accel.float_data.zA);  ssRadio.print(",");
-  ssRadio.print(_data.Data.gyro.float_data.xG);  ssRadio.print(",");
-  ssRadio.print(_data.Data.gyro.float_data.yG);  ssRadio.print(",");
-  ssRadio.print(_data.Data.gyro.float_data.zG);  ssRadio.print(",");
-  ssRadio.print(_data.Data.gps.gps_data.flat); ssRadio.print(",");
-  ssRadio.print(_data.Data.gps.gps_data.flon); ssRadio.print(",");
-  ssRadio.print(pressure);  ssRadio.print(",");
-  ssRadio.print(altitude);  ssRadio.print(",");
-  ssRadio.print(tempreture);  ssRadio.print(",");
+  ssRadio.print(_data.Data.accel.float_data.xA);  
+  ssRadio.print(",");
+  ssRadio.print(_data.Data.accel.float_data.yA);  
+  ssRadio.print(",");
+  ssRadio.print(_data.Data.accel.float_data.zA);  
+  ssRadio.print(",");
+  ssRadio.print(_data.Data.gyro.float_data.xG);  
+  ssRadio.print(",");
+  ssRadio.print(_data.Data.gyro.float_data.yG);  
+  ssRadio.print(",");
+  ssRadio.print(_data.Data.gyro.float_data.zG);  
+  ssRadio.print(",");
+  ssRadio.print(_data.Data.gps.gps_data.flat,6); 
+  ssRadio.print(",");
+  ssRadio.print(_data.Data.gps.gps_data.flon,6); 
+  ssRadio.print(",");
   ssRadio.print(time);
   ssRadio.println();
-  
+
   return(0);
 }
 
@@ -187,3 +194,14 @@ int SerialSlave::saveRadio_begin(long speed)
   ssRadio.print("xA,yA,zA,xG,yG,zG,LAT,LON,pressure,altitude,tempreture,time");
   ssRadio.println();
 }
+
+int SerialSlave::saveRadio(float data, unsigned long int time)
+{
+  ssRadio.print(data, 6);
+  ssRadio.print(",");
+  ssRadio.print(time);
+  ssRadio.println();
+  
+  return(0);
+}
+

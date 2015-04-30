@@ -22,6 +22,9 @@
 #define RECEIVE                    '1'
 #define ENABLE                     '2'
 
+#define MOTOR_START                '0'
+#define MOTOR_END                  '1'
+
 #define PARA_PIN                    6
 
 #define GYRO_ADDR 0x68 // gyro address, binary = 11101001 when AD0 is connected to Vcc (see schematics of your breakout board)
@@ -89,16 +92,12 @@ public:
   static void setData_Accel(float x, float y, float z);
   static void setData_Gyro(float x, float y, float z);
   int saveSD(sensorData data, unsigned long int time);
-  int saveRadio(unsigned long int time);
+  static int saveRadio_data(unsigned long int time);
   int saveRadio_begin(long speed);
+  int saveRadio(float data, unsigned long int time);
   
 public :
-  static float recvGPS(char *select);
-  
-public :
-  float pressure;
-  float altitude;
-  float tempreture;
+  static float recvGPS(char select);
 };
 
 extern SerialSlave Slave;
